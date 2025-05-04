@@ -21,10 +21,10 @@ from transformers import (
 import evaluate
 
 # ----- Configurações -----
-TRAIN_CSV  = "part-00000-363d1ba3-8ab5-4f96-bc25-4d5862db7cb9-c000.csv"
-TEST_CSV   = "part-00135-363d1ba3-8ab5-4f96-bc25-4d5862db7cb9-c000.csv"
+TRAIN_CSV = Path("../data/part-00000-363d1ba3-8ab5-4f96-bc25-4d5862db7cb9-c000.csv")
+TEST_CSV  = Path("../data/part-00135-363d1ba3-8ab5-4f96-bc25-4d5862db7cb9-c000.csv")
+OUTPUT_DIR = Path("/home/jvf/testes/meu_bert_finetune")
 MODEL_NAME = "distilbert/distilbert-base-uncased"
-OUTPUT_DIR = "/home/jvf/testes/meu_bert_finetune"
 BATCH_SIZE = 8
 EPOCHS     = 3
 
