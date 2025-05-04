@@ -11,6 +11,7 @@ Como usar:
   Execute: python finetune_distilbert.py
 """
 import os
+from pathlib import Path
 from datasets import load_dataset, ClassLabel
 from transformers import (
     AutoTokenizer,
