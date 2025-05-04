@@ -1,158 +1,128 @@
 #!/usr/bin/env python3
-"""Fine‑tune DistilBERT (ou outro modelo BERT‑like) usando arquivos CSV de
-tráfego de rede estruturado, convertendo cada linha em representação de texto.
-
-O script lê dois arquivos CSV:
-  * TRAIN_CSV – usado para treino (part-00000-...).
-  * TEST_CSV  – usado para avaliação final (part-00135-...).
-
-Requisitos (todos instalados no venv criado pelo setup_ml.sh):
-  transformers, datasets, evaluate, scikit-learn, pandas, torch
-
-Execute:
-  python fine_tune_distilbert.py
-
-A pasta com o checkpoint treinado será salva em OUTPUT_DIR e poderá ser
-exportada/quantizada nos passos seguintes.
 """
+Fine‑tune DistilBERT (ou outro modelo BERT‑like) para classificação multiclasse de tráfego de rede,
+sem carregar todo o CSV em memória, usando 🤗 Datasets (memory-mapped).
 
-from pathlib import Path
-from typing import Dict, List
+Requisitos:
+  pip install transformers datasets evaluate scikit-learn torch
+
+Como usar:
+  Ajuste os caminhos TRAIN_CSV e TEST_CSV para seus arquivos.
+  Execute: python finetune_distilbert.py
+"""
 import os
-import pandas as pd
-from datasets import Dataset
+from datasets import load_dataset, ClassLabel
 from transformers import (
-    AutoModelForSequenceClassification,
     AutoTokenizer,
+    AutoModelForSequenceClassification,
     TrainingArguments,
-    Trainer,
+    Trainer
 )
 import evaluate
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Configurações do usuário – ajuste apenas estas três variáveis se quiser mudar
-# ──────────────────────────────────────────────────────────────────────────────
-TRAIN_CSV = Path("../data/part-00000-363d1ba3-8ab5-4f96-bc25-4d5862db7cb9-c000.csv")
-TEST_CSV  = Path("../data/part-00135-363d1ba3-8ab5-4f96-bc25-4d5862db7cb9-c000.csv")
-OUTPUT_DIR = Path("/home/jvf/testes/meu_bert_finetune")
-MODEL_NAME = "distilbert/distilbert-base-uncased"  # troque se desejar outra base
-MAX_LENGTH = 128  # tokens por exemplo
-EPOCHS = 2        # aumente conforme disponibilidade de GPU/CPU
-BATCH_SIZE = 16
+# ----- Configurações -----
+TRAIN_CSV  = "part-00000-363d1ba3-8ab5-4f96-bc25-4d5862db7cb9-c000.csv"
+TEST_CSV   = "part-00135-363d1ba3-8ab5-4f96-bc25-4d5862db7cb9-c000.csv"
+MODEL_NAME = "distilbert/distilbert-base-uncased"
+OUTPUT_DIR = "/home/jvf/testes/meu_bert_finetune"
+BATCH_SIZE = 8
+EPOCHS     = 3
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Leitura dos CSV e pré‑processamento
-# ──────────────────────────────────────────────────────────────────────────────
-print("Lendo CSVs…")
-train_df = pd.read_csv(TRAIN_CSV)
-test_df  = pd.read_csv(TEST_CSV)
-
-# Identifica coluna de rótulo e colunas numéricas (tudo exceto "label")
-if "label" not in train_df.columns:
-    raise ValueError("A coluna 'label' não foi encontrada no CSV de treino.")
-feature_cols: List[str] = [c for c in train_df.columns if c != "label"]
-
-# Converte cada linha em string do tipo "f1:val1 f2:val2 …".
-print("Convertendo linhas em texto para BERT…")
-train_df["text"] = train_df[feature_cols].astype(str).agg(
-    lambda row: " ".join(f"{col}:{val}" for col, val in zip(feature_cols, row)), axis=1
+# ----- Carregar datasets sem pandas -----
+raw_datasets = load_dataset(
+    "csv",
+    data_files={"train": TRAIN_CSV, "test": TEST_CSV},
+    cache_dir=os.path.expanduser("~/.cache/huggingface/datasets"),
+    keep_in_memory=False
 )
 
-# Mapeia labels string → int
-label_list: List[str] = sorted(train_df["label"].unique().tolist())
-label2id: Dict[str, int] = {lbl: idx for idx, lbl in enumerate(label_list)}
+# Detectar e mapear rótulos
+labels = sorted(raw_datasets["train"].unique("label"))
+label2id = {label: idx for idx, label in enumerate(labels)}
+id2label = {idx: label for label, idx in label2id.items()}
 print("Rótulos detectados:", label2id)
 
-train_df["labels"] = train_df["label"].map(label2id)
-
-# Repete transformação para o CSV de teste
-missing_labels = set(test_df["label"]) - set(label2id)
-if missing_labels:
-    print("⚠️  Aviso: Rótulos no teste não vistos no treino serão convertidos para -1:", missing_labels)
-
-test_df["text"] = test_df[feature_cols].astype(str).agg(
-    lambda row: " ".join(f"{col}:{val}" for col, val in zip(feature_cols, row)), axis=1
+# Converter coluna `label` para ClassLabel
+raw_datasets = raw_datasets.cast_column(
+    "label", ClassLabel(names=labels)
 )
 
-test_df["labels"] = test_df["label"].map(label2id).fillna(-1).astype(int)
-
-# Cria objetos Dataset
-train_ds = Dataset.from_pandas(train_df[["text", "labels"]])
-valid_ds = Dataset.from_pandas(test_df[["text", "labels"]])
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Tokenização
-# ──────────────────────────────────────────────────────────────────────────────
-print("Carregando tokenizer/modelo base…")
-
+# Carregar tokenizer e modelo
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-
-def tokenize_fn(batch):
-    return tokenizer(batch["text"], truncation=True, padding="max_length", max_length=MAX_LENGTH)
-
-train_ds = train_ds.map(tokenize_fn, batched=True, remove_columns=["text"])
-valid_ds = valid_ds.map(tokenize_fn, batched=True, remove_columns=["text"])
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Modelo
-# ──────────────────────────────────────────────────────────────────────────────
 model = AutoModelForSequenceClassification.from_pretrained(
     MODEL_NAME,
-    num_labels=len(label_list),
-    id2label={i: l for l, i in label2id.items()},
-    label2id=label2id,
+    num_labels=len(labels),
+    id2label=id2label,
+    label2id=label2id
 )
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Métricas
-# ──────────────────────────────────────────────────────────────────────────────
-accuracy = evaluate.load("accuracy")
-f1_metric = evaluate.load("f1")
+# ----- Pré-processamento -----
+# Concatena todas as colunas (exceto `label`) em um único texto
+def concat_fields(example):
+    text = " ".join(f"{k}:{v}" for k, v in example.items() if k != "label")
+    return {"text": text}
 
+# Aplica concatenação e tokenização em lotes
+def preprocess(examples):
+    texts = [" ".join(f"{k}:{v}" for k, v in zip(examples.keys(), cols) if k != "label")
+             for cols in zip(*[examples[c] for c in examples.keys()])]
+    tokenized = tokenizer(
+        texts,
+        padding="max_length",
+        truncation=True,
+        max_length=128
+    )
+    tokenized["labels"] = [label2id[l] for l in examples["label"]]
+    return tokenized
+
+processed = raw_datasets.map(
+    preprocess,
+    batched=True,
+    batch_size=BATCH_SIZE,
+    remove_columns=raw_datasets["train"].column_names
+)
+
+# Formatar para PyTorch
+processed.set_format(type="torch",
+                     columns=["input_ids", "attention_mask", "labels"])
+
+train_dataset = processed["train"]
+eval_dataset  = processed["test"]
+
+# ----- Métricas -----
+metric_acc = evaluate.load("accuracy")
+metric_f1  = evaluate.load("f1")
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     preds = logits.argmax(axis=-1)
     return {
-        "accuracy": accuracy.compute(predictions=preds, references=labels)["accuracy"],
-        "f1": f1_metric.compute(predictions=preds, references=labels, average="weighted")["f1"],
+        "accuracy": metric_acc.compute(predictions=preds, references=labels)["accuracy"],
+        "f1": metric_f1.compute(predictions=preds, references=labels, average="weighted")["f1"]
     }
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Treinamento
-# ──────────────────────────────────────────────────────────────────────────────
-print("Iniciando treinamento…")
-
-training_args = TrainingArguments(
-    output_dir=OUTPUT_DIR / "runs",
-    num_train_epochs=EPOCHS,
-    per_device_train_batch_size=BATCH_SIZE,
-    per_device_eval_batch_size=BATCH_SIZE,
+# ----- Treino -----
+args = TrainingArguments(
+    output_dir=OUTPUT_DIR,
     evaluation_strategy="epoch",
     save_strategy="epoch",
-    metric_for_best_model="f1",
+    per_device_train_batch_size=BATCH_SIZE,
+    per_device_eval_batch_size=BATCH_SIZE,
+    num_train_epochs=EPOCHS,
+    logging_steps=50,
     load_best_model_at_end=True,
-    logging_dir=OUTPUT_DIR / "logs",
-    learning_rate=2e-5,
-    weight_decay=0.01,
-    report_to="none",
+    metric_for_best_model="f1"
 )
 
 trainer = Trainer(
     model=model,
-    args=training_args,
-    train_dataset=train_ds,
-    eval_dataset=valid_ds,
+    args=args,
+    train_dataset=train_dataset,
+    eval_dataset=eval_dataset,
     compute_metrics=compute_metrics,
+    tokenizer=tokenizer
 )
 
 trainer.train()
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Salvando checkpoint e tokenizer
-# ──────────────────────────────────────────────────────────────────────────────
-print("Salvando modelo em", OUTPUT_DIR)
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-model.save_pretrained(OUTPUT_DIR)
-tokenizer.save_pretrained(OUTPUT_DIR)
-print("✅  Fine‑tune concluído.")
+trainer.save_model(OUTPUT_DIR)
+print(f"Modelo salvo em {OUTPUT_DIR}")
