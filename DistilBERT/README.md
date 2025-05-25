@@ -49,6 +49,12 @@ python3 test_installation.py
 
 ## 🔧 Solução de Problemas
 
+### Erro de Sintaxe Python
+```bash
+# Se aparecer: "SyntaxError: unterminated string literal"
+python test_syntax.py  # Verificar sintaxe de todos os arquivos
+```
+
 ### Erro de Versão ONNX Runtime
 ```bash
 # Se aparecer: "No matching distribution found for onnxruntime==1.15.1"

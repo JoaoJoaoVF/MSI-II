@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -113,8 +112,7 @@ class RealTimeMonitor:
         """Registrar detecção em arquivo"""
         
         with open(self.log_file, 'a') as f:
-            f.write(json.dumps(result) + '
-')
+            f.write(json.dumps(result) + '\n')
     
     def process_data_stream(self):
         """Processar stream de dados em tempo real"""
@@ -178,8 +176,7 @@ def simulate_network_data(csv_file, detector, monitor, delay=1.0):
         # Mostrar progresso
         if (idx + 1) % 100 == 0:
             stats = detector.get_statistics()
-            print(f"
-Processadas {idx + 1} amostras")
+            print(f"\nProcessadas {idx + 1} amostras")
             print(f"Taxa de ataques: {stats.get('attack_rate', 0):.3f}")
             print(f"Tempo médio: {stats.get('avg_inference_time_ms', 0):.2f} ms")
         
@@ -216,8 +213,7 @@ def main():
             detector.predict(test_features)
         
         stats = detector.get_statistics()
-        print(f"
-Resultados do benchmark:")
+        print(f"\nResultados do benchmark:")
         print(f"Predições: {stats['total_predictions']}")
         print(f"Tempo médio: {stats['avg_inference_time_ms']:.2f} ms")
         print(f"Throughput: {stats['throughput_per_second']:.2f} predições/segundo")
@@ -229,22 +225,19 @@ Resultados do benchmark:")
         try:
             simulate_network_data(args.simulate, detector, monitor, args.delay)
         except KeyboardInterrupt:
-            print("
-Interrompido pelo usuário")
+            print("Interrompido pelo usuário")
         finally:
             monitor.stop_monitoring()
             
             # Mostrar estatísticas finais
             stats = detector.get_statistics()
-            print(f"
-=== ESTATÍSTICAS FINAIS ===")
+            print(f"\n=== ESTATÍSTICAS FINAIS ===")
             for key, value in stats.items():
                 print(f"{key}: {value}")
     
     elif args.interactive:
         # Modo interativo
-        print("
-Modo interativo ativado.")
+        print("\nModo interativo ativado.")
         print("Digite valores para as features ou 'sair' para encerrar.")
         print(f"Features necessárias: {detector.feature_names[:5]}... (total: {len(detector.feature_names)})")
         
@@ -256,8 +249,7 @@ Modo interativo ativado.")
                 test_features = {name: np.random.randn() for name in detector.feature_names}
                 result = detector.predict(test_features)
                 
-                print(f"
-Resultado:")
+                print(f"\nResultado:")
                 print(f"  Classe: {result['predicted_class']}")
                 print(f"  Confiança: {result['confidence']:.3f}")
                 print(f"  É ataque: {result['is_attack']}")
