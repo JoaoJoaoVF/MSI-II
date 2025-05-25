@@ -12,6 +12,7 @@ import pickle
 import time
 import argparse
 import json
+import os
 from datetime import datetime
 import threading
 import queue
@@ -102,17 +103,66 @@ class NetworkAttackDetector:
         }
 
 class RealTimeMonitor:
-    def __init__(self, detector, log_file='attack_log.json'):
+    def __init__(self, detector, log_file='attack_log.json', result_file=None):
         self.detector = detector
         self.log_file = log_file
+        self.result_file = result_file
         self.data_queue = queue.Queue()
         self.running = False
+        self.results = []  # Armazenar todos os resultados
     
     def log_detection(self, result):
         """Registrar detecção em arquivo"""
         
         with open(self.log_file, 'a') as f:
             f.write(json.dumps(result) + '\n')
+    
+    def save_result(self, message):
+        """Salvar resultado em arquivo específico"""
+        
+        if self.result_file:
+            with open(self.result_file, 'a', encoding='utf-8') as f:
+                f.write(message + '\n')
+        else:
+            print(message)
+    
+    def save_all_results(self):
+        """Salvar todos os resultados coletados"""
+        
+        if self.result_file and self.results:
+            with open(self.result_file, 'w', encoding='utf-8') as f:
+                f.write("=== RESULTADOS DA ANÁLISE ===\n")
+                f.write(f"Data/Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"Total de amostras processadas: {len(self.results)}\n\n")
+                
+                # Estatísticas gerais
+                attacks = [r for r in self.results if r['is_attack']]
+                f.write(f"Ataques detectados: {len(attacks)}\n")
+                f.write(f"Taxa de ataques: {len(attacks)/len(self.results)*100:.2f}%\n")
+                f.write(f"Tráfego normal: {len(self.results) - len(attacks)}\n\n")
+                
+                # Tipos de ataques detectados
+                if attacks:
+                    attack_types = {}
+                    for attack in attacks:
+                        attack_type = attack['predicted_class']
+                        attack_types[attack_type] = attack_types.get(attack_type, 0) + 1
+                    
+                    f.write("=== TIPOS DE ATAQUES DETECTADOS ===\n")
+                    for attack_type, count in sorted(attack_types.items()):
+                        f.write(f"{attack_type}: {count} ocorrências\n")
+                    f.write("\n")
+                
+                # Detalhes de cada detecção
+                f.write("=== DETALHES DAS DETECÇÕES ===\n")
+                for i, result in enumerate(self.results, 1):
+                    status = "🚨 ATAQUE" if result['is_attack'] else "✅ NORMAL"
+                    f.write(f"Amostra {i}: {status}\n")
+                    f.write(f"  Classe: {result['predicted_class']}\n")
+                    f.write(f"  Confiança: {result['confidence']:.3f}\n")
+                    f.write(f"  Tempo de inferência: {result['inference_time_ms']:.2f} ms\n")
+                    f.write(f"  Timestamp: {result['timestamp']}\n")
+                    f.write("\n")
     
     def process_data_stream(self):
         """Processar stream de dados em tempo real"""
@@ -125,19 +175,25 @@ class RealTimeMonitor:
                 # Fazer predição
                 result = self.detector.predict(features_dict)
                 
+                # Armazenar resultado
+                self.results.append(result)
+                
                 # Log se for ataque
                 if result['is_attack']:
-                    print(f"🚨 ATAQUE DETECTADO: {result['predicted_class']} (Confiança: {result['confidence']:.3f})")
+                    message = f"🚨 ATAQUE DETECTADO: {result['predicted_class']} (Confiança: {result['confidence']:.3f})"
+                    self.save_result(message)
                     self.log_detection(result)
                 else:
-                    print(f"✅ Tráfego normal (Confiança: {result['confidence']:.3f})")
+                    message = f"✅ Tráfego normal (Confiança: {result['confidence']:.3f})"
+                    self.save_result(message)
                 
                 self.data_queue.task_done()
                 
             except queue.Empty:
                 continue
             except Exception as e:
-                print(f"Erro no processamento: {e}")
+                error_msg = f"Erro no processamento: {e}"
+                self.save_result(error_msg)
     
     def start_monitoring(self):
         """Iniciar monitoramento"""
@@ -161,10 +217,12 @@ class RealTimeMonitor:
 def simulate_network_data(csv_file, detector, monitor, delay=1.0):
     """Simular dados de rede em tempo real"""
     
-    print(f"Carregando dados de simulação: {csv_file}")
+    message = f"Carregando dados de simulação: {csv_file}"
+    monitor.save_result(message)
     df = pd.read_csv(csv_file)
     
-    print(f"Iniciando simulação com {len(df)} amostras...")
+    message = f"Iniciando simulação com {len(df)} amostras..."
+    monitor.save_result(message)
     
     for idx, row in df.iterrows():
         # Converter linha para dicionário (excluindo label)
@@ -176,9 +234,10 @@ def simulate_network_data(csv_file, detector, monitor, delay=1.0):
         # Mostrar progresso
         if (idx + 1) % 100 == 0:
             stats = detector.get_statistics()
-            print(f"\nProcessadas {idx + 1} amostras")
-            print(f"Taxa de ataques: {stats.get('attack_rate', 0):.3f}")
-            print(f"Tempo médio: {stats.get('avg_inference_time_ms', 0):.2f} ms")
+            progress_msg = f"\nProcessadas {idx + 1} amostras"
+            monitor.save_result(progress_msg)
+            monitor.save_result(f"Taxa de ataques: {stats.get('attack_rate', 0):.3f}")
+            monitor.save_result(f"Tempo médio: {stats.get('avg_inference_time_ms', 0):.2f} ms")
         
         time.sleep(delay)
 
@@ -190,13 +249,24 @@ def main():
     parser.add_argument('--delay', type=float, default=0.1, help='Delay entre amostras (segundos)')
     parser.add_argument('--interactive', action='store_true', help='Modo interativo')
     parser.add_argument('--benchmark', action='store_true', help='Benchmark de performance')
+    parser.add_argument('--output', type=str, help='Arquivo de saída personalizado')
     
     args = parser.parse_args()
+    
+    # Criar nome do arquivo de resultado baseado no CSV de entrada
+    result_file = None
+    if args.simulate:
+        csv_basename = os.path.splitext(os.path.basename(args.simulate))[0]
+        result_file = f"result-{csv_basename}.txt"
+        print(f"Resultados serão salvos em: {result_file}")
+    elif args.output:
+        result_file = args.output
+        print(f"Resultados serão salvos em: {result_file}")
     
     # Inicializar detector
     try:
         detector = NetworkAttackDetector(args.model, args.metadata)
-        monitor = RealTimeMonitor(detector)
+        monitor = RealTimeMonitor(detector, result_file=result_file)
     except Exception as e:
         print(f"Erro ao inicializar detector: {e}")
         sys.exit(1)
@@ -224,16 +294,27 @@ def main():
         
         try:
             simulate_network_data(args.simulate, detector, monitor, args.delay)
+            
+            # Aguardar processamento de todas as amostras
+            monitor.data_queue.join()
+            
         except KeyboardInterrupt:
-            print("Interrompido pelo usuário")
+            monitor.save_result("Interrompido pelo usuário")
         finally:
             monitor.stop_monitoring()
             
+            # Salvar relatório final
+            monitor.save_all_results()
+            
             # Mostrar estatísticas finais
             stats = detector.get_statistics()
-            print(f"\n=== ESTATÍSTICAS FINAIS ===")
+            final_stats = f"\n=== ESTATÍSTICAS FINAIS ==="
+            monitor.save_result(final_stats)
             for key, value in stats.items():
-                print(f"{key}: {value}")
+                monitor.save_result(f"{key}: {value}")
+            
+            if result_file:
+                print(f"\n✅ Análise concluída! Resultados salvos em: {result_file}")
     
     elif args.interactive:
         # Modo interativo

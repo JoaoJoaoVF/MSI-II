@@ -91,10 +91,17 @@ python3 realtime_network_monitor.py --benchmark
 ./start_detector.sh
 ```
 
-### 3. Simulação com Dados CSV
+### 3. Simulação com Dados CSV (com arquivo de resultado)
 ```bash
 source venv/bin/activate
+# Os resultados serão salvos automaticamente em result-nome_do_csv.txt
 python3 realtime_network_monitor.py --simulate seus_dados.csv
+
+# Exemplo: se o arquivo for "network_data.csv", será criado "result-network_data.txt"
+python3 realtime_network_monitor.py --simulate network_data.csv
+
+# Para especificar um arquivo de saída personalizado
+python3 realtime_network_monitor.py --simulate dados.csv --output meu_resultado.txt
 ```
 
 ### 4. Análise de Performance

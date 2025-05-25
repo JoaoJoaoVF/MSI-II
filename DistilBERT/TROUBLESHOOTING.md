@@ -194,6 +194,7 @@ python3 performance_analyzer.py --test_data dados.csv
 ### Logs Úteis
 - `logs/attack_log.json` - Logs de detecção
 - `analysis_results/` - Relatórios de análise
+- `result-*.txt` - Arquivos de resultado da análise
 - `pip list` - Pacotes instalados
 
 ### Informações para Suporte
@@ -239,3 +240,10 @@ pip install --upgrade pip
 - Use `nice` para prioridade baixa
 - Monitore com `htop`
 - Configure logrotate para logs 
+
+### Arquivos de Resultado
+O sistema agora gera automaticamente arquivos de resultado:
+- **Formato**: `result-nome_do_csv.txt`
+- **Conteúdo**: Estatísticas completas, tipos de ataques, detalhes de cada detecção
+- **Localização**: Diretório atual de execução
+- **Exemplo**: Para `network_data.csv` → `result-network_data.txt` 
