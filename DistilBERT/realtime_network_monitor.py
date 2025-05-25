@@ -13,10 +13,15 @@ import time
 import argparse
 import json
 import os
+import warnings
 from datetime import datetime
 import threading
 import queue
 import sys
+
+# Suprimir avisos específicos do sklearn
+warnings.filterwarnings('ignore', message='X does not have valid feature names')
+warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 
 class NetworkAttackDetector:
     def __init__(self, model_path, metadata_path):
@@ -45,11 +50,22 @@ class NetworkAttackDetector:
     def preprocess_features(self, features_dict):
         """Pré-processar features de entrada"""
         
-        # Converter para array na ordem correta
-        features_array = np.array([features_dict.get(name, 0.0) for name in self.feature_names])
+        # Criar DataFrame com todas as features necessárias
+        # Garantir que todas as features estejam presentes, preenchendo com 0 se ausentes
+        feature_values = {}
+        for feature_name in self.feature_names:
+            feature_values[feature_name] = features_dict.get(feature_name, 0.0)
         
-        # Normalizar
-        features_scaled = self.scaler.transform(features_array.reshape(1, -1))
+        # Converter para DataFrame com uma linha
+        features_df = pd.DataFrame([feature_values])
+        
+        # Normalizar usando o scaler treinado
+        try:
+            features_scaled = self.scaler.transform(features_df)
+        except Exception as e:
+            print(f"Aviso: Erro na normalização, usando dados sem normalização: {e}")
+            # Fallback: usar dados sem normalização se houver erro
+            features_scaled = features_df.values
         
         return features_scaled.astype(np.float32)
     

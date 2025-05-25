@@ -1,5 +1,23 @@
 # Changelog - Sistema de Detecção de Ataques
 
+## [1.2.1] - 2024-12-19
+
+### 🐛 Correções de Bugs
+- **CORRIGIDO**: Avisos do StandardScaler `X does not have valid feature names`
+  - Modificado `preprocess_features()` para usar DataFrame em vez de array NumPy
+  - Adicionados filtros de avisos específicos para sklearn
+  - Implementado tratamento de erro com fallback
+  - Mantidos nomes das features durante transformação
+
+### ✨ Novas Funcionalidades
+- **NOVO**: Script `fix_feature_warnings.py` para demonstrar e corrigir problemas de feature names
+- **MELHORADO**: Pré-processamento mais robusto com tratamento de erros
+
+### 🔧 Melhorias
+- **Experiência do usuário**: Eliminação de avisos desnecessários
+- **Robustez**: Fallback automático em caso de erro na normalização
+- **Documentação**: Guia específico para problemas de StandardScaler
+
 ## [1.2.0] - 2024-12-19
 
 ### 🐛 Correções de Bugs

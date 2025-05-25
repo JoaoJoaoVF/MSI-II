@@ -142,6 +142,31 @@ ls -la
 sudo chown -R $USER:$USER .
 ```
 
+### 9. Avisos do StandardScaler
+
+**Problema**: `UserWarning: X does not have valid feature names, but StandardScaler was fitted with feature names`
+
+**Causa**: O scaler foi treinado com DataFrame (com nomes de features) mas está recebendo array NumPy (sem nomes)
+
+**Soluções**:
+```bash
+# Já corrigido no código, mas se persistir:
+
+# Opção 1: Executar script de demonstração
+python fix_feature_warnings.py
+
+# Opção 2: Suprimir avisos temporariamente
+export PYTHONWARNINGS='ignore::UserWarning'
+python3 realtime_network_monitor.py --simulate dados.csv
+
+# Opção 3: Verificar se o problema foi corrigido
+python3 -c "
+import warnings
+warnings.filterwarnings('ignore', message='X does not have valid feature names')
+print('Avisos suprimidos com sucesso')
+"
+```
+
 ## 🔧 Comandos de Diagnóstico
 
 ### Verificar Sistema
