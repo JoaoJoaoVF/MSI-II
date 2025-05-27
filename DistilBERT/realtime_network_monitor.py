@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Sistema de Detecção de Ataques de Rede em Tempo Real
-Otimizado para Raspberry Pi
-"""
 
 import onnxruntime as ort
 import numpy as np
@@ -19,13 +15,11 @@ import threading
 import queue
 import sys
 
-# Suprimir avisos específicos do sklearn
 warnings.filterwarnings('ignore', message='X does not have valid feature names')
 warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 
 class NetworkAttackDetector:
     def __init__(self, model_path, metadata_path):
-        """Inicializar detector de ataques"""
         
         print("Carregando modelo...")
         self.session = ort.InferenceSession(model_path)
@@ -42,68 +36,55 @@ class NetworkAttackDetector:
         print(f"Modelo carregado com sucesso!")
         print(f"Classes detectáveis: {self.classes}")
         
-        # Estatísticas
         self.total_predictions = 0
         self.attack_detections = 0
         self.inference_times = []
     
     def preprocess_features(self, features_dict):
-        """Pré-processar features de entrada"""
         
-        # Criar DataFrame com todas as features necessárias
-        # Garantir que todas as features estejam presentes, preenchendo com 0 se ausentes
         feature_values = {}
         for feature_name in self.feature_names:
             feature_values[feature_name] = features_dict.get(feature_name, 0.0)
         
-        # Converter para DataFrame com uma linha
         features_df = pd.DataFrame([feature_values])
         
-        # Normalizar usando o scaler treinado
         try:
             features_scaled = self.scaler.transform(features_df)
         except Exception as e:
             print(f"Aviso: Erro na normalização, usando dados sem normalização: {e}")
-            # Fallback: usar dados sem normalização se houver erro
             features_scaled = features_df.values
         
         return features_scaled.astype(np.float32)
     
     def predict(self, features_dict):
-        """Fazer predição de ataque"""
         
-        # Pré-processar
         features = self.preprocess_features(features_dict)
         
-        # Inferência
         start_time = time.time()
         ort_inputs = {'features': features}
         logits, probabilities = self.session.run(None, ort_inputs)
         inference_time = (time.time() - start_time) * 1000
         
-        # Processar resultado
         predicted_class_idx = np.argmax(probabilities[0])
         predicted_class = self.classes[predicted_class_idx]
         confidence = probabilities[0][predicted_class_idx]
         
-        # Atualizar estatísticas
         self.total_predictions += 1
         self.inference_times.append(inference_time)
-        
-        if predicted_class != 'Benign':  # Assumindo que 'Benign' é tráfego normal
+
+        if predicted_class != 'Benign' or predicted_class != 'BenignTraffic':  # Assumindo que 'Benign' ou 'BenignTraffic' é tráfego normal
             self.attack_detections += 1
         
         return {
             'timestamp': datetime.now().isoformat(),
             'predicted_class': predicted_class,
             'confidence': float(confidence),
-            'is_attack': predicted_class != 'Benign',
+            'is_attack': predicted_class != 'Benign' or predicted_class != 'BenignTraffic',
             'inference_time_ms': inference_time,
             'all_probabilities': probabilities[0].tolist()
         }
     
     def get_statistics(self):
-        """Obter estatísticas do detector"""
         
         if not self.inference_times:
             return {}
@@ -125,16 +106,14 @@ class RealTimeMonitor:
         self.result_file = result_file
         self.data_queue = queue.Queue()
         self.running = False
-        self.results = []  # Armazenar todos os resultados
+        self.results = []  
     
     def log_detection(self, result):
-        """Registrar detecção em arquivo"""
         
         with open(self.log_file, 'a') as f:
             f.write(json.dumps(result) + '\n')
     
     def save_result(self, message):
-        """Salvar resultado em arquivo específico"""
         
         if self.result_file:
             with open(self.result_file, 'a', encoding='utf-8') as f:
@@ -143,7 +122,6 @@ class RealTimeMonitor:
             print(message)
     
     def save_all_results(self):
-        """Salvar todos os resultados coletados"""
         
         if self.result_file and self.results:
             with open(self.result_file, 'w', encoding='utf-8') as f:
@@ -151,13 +129,11 @@ class RealTimeMonitor:
                 f.write(f"Data/Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
                 f.write(f"Total de amostras processadas: {len(self.results)}\n\n")
                 
-                # Estatísticas gerais
                 attacks = [r for r in self.results if r['is_attack']]
                 f.write(f"Ataques detectados: {len(attacks)}\n")
                 f.write(f"Taxa de ataques: {len(attacks)/len(self.results)*100:.2f}%\n")
                 f.write(f"Tráfego normal: {len(self.results) - len(attacks)}\n\n")
                 
-                # Tipos de ataques detectados
                 if attacks:
                     attack_types = {}
                     for attack in attacks:
@@ -169,7 +145,6 @@ class RealTimeMonitor:
                         f.write(f"{attack_type}: {count} ocorrências\n")
                     f.write("\n")
                 
-                # Detalhes de cada detecção
                 f.write("=== DETALHES DAS DETECÇÕES ===\n")
                 for i, result in enumerate(self.results, 1):
                     status = "🚨 ATAQUE" if result['is_attack'] else "✅ NORMAL"
@@ -181,20 +156,15 @@ class RealTimeMonitor:
                     f.write("\n")
     
     def process_data_stream(self):
-        """Processar stream de dados em tempo real"""
         
         while self.running:
             try:
-                # Obter dados da fila
                 features_dict = self.data_queue.get(timeout=1)
                 
-                # Fazer predição
                 result = self.detector.predict(features_dict)
                 
-                # Armazenar resultado
                 self.results.append(result)
                 
-                # Log se for ataque
                 if result['is_attack']:
                     message = f"🚨 ATAQUE DETECTADO: {result['predicted_class']} (Confiança: {result['confidence']:.3f})"
                     self.save_result(message)
@@ -212,7 +182,6 @@ class RealTimeMonitor:
                 self.save_result(error_msg)
     
     def start_monitoring(self):
-        """Iniciar monitoramento"""
         
         self.running = True
         monitor_thread = threading.Thread(target=self.process_data_stream)
@@ -223,16 +192,12 @@ class RealTimeMonitor:
         return monitor_thread
     
     def stop_monitoring(self):
-        """Parar monitoramento"""
         self.running = False
     
     def add_data(self, features_dict):
-        """Adicionar dados para análise"""
         self.data_queue.put(features_dict)
 
 def simulate_network_data(csv_file, detector, monitor, delay=1.0):
-    """Simular dados de rede em tempo real"""
-    
     message = f"Carregando dados de simulação: {csv_file}"
     monitor.save_result(message)
     df = pd.read_csv(csv_file)
@@ -241,13 +206,10 @@ def simulate_network_data(csv_file, detector, monitor, delay=1.0):
     monitor.save_result(message)
     
     for idx, row in df.iterrows():
-        # Converter linha para dicionário (excluindo label)
         features_dict = row.drop('label').to_dict()
         
-        # Adicionar à fila de monitoramento
         monitor.add_data(features_dict)
         
-        # Mostrar progresso
         if (idx + 1) % 100 == 0:
             stats = detector.get_statistics()
             progress_msg = f"\nProcessadas {idx + 1} amostras"
@@ -269,7 +231,6 @@ def main():
     
     args = parser.parse_args()
     
-    # Criar nome do arquivo de resultado baseado no CSV de entrada
     result_file = None
     if args.simulate:
         csv_basename = os.path.splitext(os.path.basename(args.simulate))[0]
@@ -279,7 +240,6 @@ def main():
         result_file = args.output
         print(f"Resultados serão salvos em: {result_file}")
     
-    # Inicializar detector
     try:
         detector = NetworkAttackDetector(args.model, args.metadata)
         monitor = RealTimeMonitor(detector, result_file=result_file)
@@ -288,13 +248,10 @@ def main():
         sys.exit(1)
     
     if args.benchmark:
-        # Benchmark de performance
         print("Executando benchmark...")
         
-        # Criar dados de teste
         test_features = {name: np.random.randn() for name in detector.feature_names}
         
-        # Executar múltiplas predições
         for i in range(1000):
             detector.predict(test_features)
         
@@ -305,13 +262,11 @@ def main():
         print(f"Throughput: {stats['throughput_per_second']:.2f} predições/segundo")
         
     elif args.simulate:
-        # Simular dados de rede
         monitor_thread = monitor.start_monitoring()
         
         try:
             simulate_network_data(args.simulate, detector, monitor, args.delay)
             
-            # Aguardar processamento de todas as amostras
             monitor.data_queue.join()
             
         except KeyboardInterrupt:
@@ -319,10 +274,8 @@ def main():
         finally:
             monitor.stop_monitoring()
             
-            # Salvar relatório final
             monitor.save_all_results()
             
-            # Mostrar estatísticas finais
             stats = detector.get_statistics()
             final_stats = f"\n=== ESTATÍSTICAS FINAIS ==="
             monitor.save_result(final_stats)
@@ -333,14 +286,12 @@ def main():
                 print(f"\n✅ Análise concluída! Resultados salvos em: {result_file}")
     
     elif args.interactive:
-        # Modo interativo
         print("\nModo interativo ativado.")
         print("Digite valores para as features ou 'sair' para encerrar.")
         print(f"Features necessárias: {detector.feature_names[:5]}... (total: {len(detector.feature_names)})")
         
         while True:
             try:
-                # Exemplo simples: usar valores aleatórios
                 input("Pressione Enter para gerar predição com dados aleatórios (ou Ctrl+C para sair): ")
                 
                 test_features = {name: np.random.randn() for name in detector.feature_names}

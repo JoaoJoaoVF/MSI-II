@@ -1,2 +1,3 @@
 DistilBERT/venv/*
 data/*
+DistilBERT/__pycache__/*

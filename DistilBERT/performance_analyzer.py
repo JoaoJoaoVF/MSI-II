@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Analisador de Performance para Detecção de Ataques de Rede
-Gera relatórios detalhados de métricas e performance
-"""
+
 
 import onnxruntime as ort
 import numpy as np
@@ -21,7 +18,6 @@ from datetime import datetime
 
 class PerformanceAnalyzer:
     def __init__(self, model_path, metadata_path):
-        """Inicializar analisador de performance"""
         
         print("Carregando modelo para análise...")
         self.session = ort.InferenceSession(model_path)
@@ -37,22 +33,17 @@ class PerformanceAnalyzer:
         print(f"Modelo carregado: {len(self.classes)} classes")
     
     def preprocess_data(self, df):
-        """Pré-processar dados de teste"""
         
-        # Separar features e labels
         X = df[self.feature_names].fillna(0)
         y_true_labels = df['label']
         
-        # Normalizar features
         X_scaled = self.scaler.transform(X)
         
-        # Codificar labels
         y_true = self.label_encoder.transform(y_true_labels)
         
         return X_scaled.astype(np.float32), y_true, y_true_labels
     
     def batch_predict(self, X):
-        """Fazer predições em lote"""
         
         predictions = []
         probabilities = []
@@ -66,13 +57,11 @@ class PerformanceAnalyzer:
             end_idx = min((i + 1) * batch_size, len(X))
             batch = X[start_idx:end_idx]
             
-            # Medir tempo de inferência
             start_time = time.time()
             ort_inputs = {'features': batch}
             logits, probs = self.session.run(None, ort_inputs)
             inference_time = (time.time() - start_time) * 1000
             
-            # Armazenar resultados
             batch_predictions = np.argmax(probs, axis=1)
             predictions.extend(batch_predictions)
             probabilities.extend(probs)
@@ -84,36 +73,29 @@ class PerformanceAnalyzer:
         return np.array(predictions), np.array(probabilities), inference_times
     
     def calculate_metrics(self, y_true, y_pred, y_prob):
-        """Calcular métricas detalhadas"""
         
         from sklearn.metrics import (
             accuracy_score, precision_score, recall_score, f1_score,
             classification_report, confusion_matrix
         )
         
-        # Métricas básicas
         accuracy = accuracy_score(y_true, y_pred)
         precision = precision_score(y_true, y_pred, average='weighted')
         recall = recall_score(y_true, y_pred, average='weighted')
         f1 = f1_score(y_true, y_pred, average='weighted')
         
-        # Métricas por classe
         class_report = classification_report(
             y_true, y_pred, 
             target_names=self.classes,
             output_dict=True
         )
         
-        # Matriz de confusão
         cm = confusion_matrix(y_true, y_pred)
         
-        # Métricas específicas para detecção de ataques
-        # Assumindo que classe 0 é 'Benign' (normal)
         benign_class_idx = 0
         if 'Benign' in self.classes:
             benign_class_idx = list(self.classes).index('Benign')
         
-        # True/False Positives para detecção de ataques
         y_binary_true = (y_true != benign_class_idx).astype(int)  # 1 = ataque, 0 = normal
         y_binary_pred = (y_pred != benign_class_idx).astype(int)
         
@@ -138,7 +120,6 @@ class PerformanceAnalyzer:
         }
     
     def analyze_performance(self, test_file, output_dir='analysis_results'):
-        """Análise completa de performance"""
         
         import os
         os.makedirs(output_dir, exist_ok=True)
@@ -146,22 +127,18 @@ class PerformanceAnalyzer:
         print(f"Carregando dados de teste: {test_file}")
         df = pd.read_csv(test_file)
         
-        # Limitar dados para análise mais rápida
         if len(df) > 10000:
             df = df.sample(n=10000, random_state=42)
             print(f"Usando amostra de {len(df)} registros")
         
-        # Pré-processar dados
         X, y_true, y_true_labels = self.preprocess_data(df)
         
         print("Executando predições...")
         y_pred, y_prob, inference_times = self.batch_predict(X)
         
-        # Calcular métricas
         print("Calculando métricas...")
         metrics = self.calculate_metrics(y_true, y_pred, y_prob)
         
-        # Análise de tempo
         total_inference_time = sum(inference_times)
         avg_inference_time = np.mean(inference_times)
         throughput = len(X) / (total_inference_time / 1000)  # amostras por segundo
@@ -174,15 +151,12 @@ class PerformanceAnalyzer:
             'throughput_samples_per_second': throughput
         }
         
-        # Gerar relatórios
         self.generate_reports(metrics, performance_metrics, y_true, y_pred, y_prob, output_dir)
         
         return metrics, performance_metrics
     
     def generate_reports(self, metrics, performance_metrics, y_true, y_pred, y_prob, output_dir):
-        """Gerar relatórios visuais e textuais"""
         
-        # 1. Relatório textual
         report_text = f"""
 # Relatório de Performance - Detecção de Ataques de Rede
 Data: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -221,7 +195,6 @@ Data: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         with open(f"{output_dir}/performance_report.md", 'w') as f:
             f.write(report_text)
         
-        # 2. Matriz de confusão
         plt.figure(figsize=(12, 10))
         sns.heatmap(
             metrics['confusion_matrix'], 
@@ -240,10 +213,8 @@ Data: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         plt.savefig(f"{output_dir}/confusion_matrix.png", dpi=300, bbox_inches='tight')
         plt.close()
         
-        # 3. Distribuição de confiança
         plt.figure(figsize=(12, 6))
         
-        # Confiança para cada classe
         max_probs = np.max(y_prob, axis=1)
         correct_predictions = (y_true == y_pred)
         
@@ -255,7 +226,6 @@ Data: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         plt.title('Distribuição de Confiança')
         plt.legend()
         
-        # Distribuição por classe
         plt.subplot(1, 2, 2)
         class_counts = pd.Series(y_true).value_counts().sort_index()
         class_names = [self.classes[i] for i in class_counts.index]
@@ -269,7 +239,6 @@ Data: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         plt.savefig(f"{output_dir}/confidence_distribution.png", dpi=300, bbox_inches='tight')
         plt.close()
         
-        # 4. Salvar métricas em JSON
         results = {
             'metrics': metrics,
             'performance': performance_metrics,
@@ -281,7 +250,6 @@ Data: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             'timestamp': datetime.now().isoformat()
         }
         
-        # Converter numpy arrays para listas para serialização JSON
         def convert_numpy(obj):
             if isinstance(obj, np.ndarray):
                 return obj.tolist()
