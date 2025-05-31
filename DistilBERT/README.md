@@ -3,8 +3,8 @@
 ## 🚀 Instalação
 
 ```bash
-chmod +x deploy.sh
-./deploy.sh
+chmod +x config_environment.sh
+./config_environment.sh
 ```
 
 ou

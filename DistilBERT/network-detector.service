@@ -5,9 +5,9 @@ After=network.target
 [Service]
 Type=simple
 User=jvf
-WorkingDirectory=/home/jvf/testes/DistilBERT
-Environment=PATH=/home/jvf/testes/DistilBERT/venv/bin
-ExecStart=/home/jvf/testes/DistilBERT/venv/bin/python /home/jvf/testes/DistilBERT/realtime_network_monitor.py --interactive
+WorkingDirectory=/home/jvf/DistilBERT
+Environment=PATH=/home/jvf/DistilBERT/venv/bin
+ExecStart=/home/jvf/DistilBERT/venv/bin/python /home/jvf/DistilBERT/realtime_network_monitor.py --interactive
 Restart=always
 RestartSec=10
 
