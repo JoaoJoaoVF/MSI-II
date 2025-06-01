@@ -1,20 +1,3 @@
-{
-    "model": {
-        "path": "network_attack_detector_quantized.onnx",
-        "metadata_path": "model_metadata.pkl"
-    },
-    "monitoring": {
-        "log_file": "logs/attack_log.json",
-        "batch_size": 32,
-        "alert_threshold": 0.8
-    },
-    "performance": {
-        "max_inference_time_ms": 100,
-        "target_throughput": 100
-    },
-    "alerts": {
-        "enable_email": false,
-        "enable_syslog": true,
-        "enable_file_log": true
-    }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:75ee32e249a875546d5002b12fbc17bf5f81d700c8aedd50be0f28b6e2542cd6
+size 473

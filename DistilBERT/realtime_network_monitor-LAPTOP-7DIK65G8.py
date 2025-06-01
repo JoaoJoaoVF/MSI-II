@@ -19,7 +19,7 @@ warnings.filterwarnings('ignore', message='X does not have valid feature names')
 warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 
 class NetworkAttackDetector:
-    def __init__(self, model_path, metadata_path, confidence_threshold=0.8):
+    def __init__(self, model_path, metadata_path):
         
         print("Carregando modelo...")
         self.session = ort.InferenceSession(model_path)
@@ -33,20 +33,8 @@ class NetworkAttackDetector:
         self.feature_names = self.metadata['feature_names']
         self.classes = self.metadata['classes']
         
-        # Configurar threshold de confiança
-        self.confidence_threshold = confidence_threshold
-        
-        # Definir classes consideradas menos perigosas (podem ser ajustadas)
-        self.low_threat_classes = [
-            'VulnerabilityScan',  # Menos crítico que DDoS
-            'Recon-PingSweep',    # Reconhecimento básico
-            'BrowserHijacking'    # Menos impactante que DDoS
-        ]
-        
         print(f"Modelo carregado com sucesso!")
         print(f"Classes detectáveis: {self.classes}")
-        print(f"Threshold de confiança: {self.confidence_threshold}")
-        print(f"Classes de baixa ameaça: {self.low_threat_classes}")
         
         self.total_predictions = 0
         self.attack_detections = 0
@@ -84,40 +72,14 @@ class NetworkAttackDetector:
         self.total_predictions += 1
         self.inference_times.append(inference_time)
 
-        # CORREÇÃO: Implementar lógica robusta para determinar ataques
-        # Já que não há classe "Benign" no dataset, usar estratégia combinada:
-        
-        # Método 1: Threshold de confiança
-        high_confidence_attack = confidence > self.confidence_threshold
-        
-        # Método 2: Classificar por severidade
-        is_high_threat = predicted_class not in self.low_threat_classes
-        
-        # Método 3: Threshold dinâmico baseado no tipo de ataque
-        ddos_classes = [cls for cls in self.classes if 'DDoS' in cls or 'DoS' in cls]
-        is_ddos = predicted_class in ddos_classes
-        
-        # Lógica final: Considerar ataque se:
-        # - Alta confiança E (alta ameaça OU é DDoS)
-        # - OU confiança muito alta (>0.9) independente do tipo
-        is_critical_attack = (
-            (high_confidence_attack and is_high_threat) or
-            (high_confidence_attack and is_ddos) or
-            (confidence > 0.9)
-        )
-        
-        # Atualizar estatísticas apenas para ataques críticos
-        if is_critical_attack:
+        if predicted_class != 'Benign' or predicted_class != 'BenignTraffic':  # Assumindo que 'Benign' ou 'BenignTraffic' é tráfego normal
             self.attack_detections += 1
         
         return {
             'timestamp': datetime.now().isoformat(),
             'predicted_class': predicted_class,
             'confidence': float(confidence),
-            'is_attack': is_critical_attack,
-            'is_high_threat': is_high_threat,
-            'is_ddos': is_ddos,
-            'confidence_threshold': self.confidence_threshold,
+            'is_attack': predicted_class != 'Benign' or predicted_class != 'BenignTraffic',
             'inference_time_ms': inference_time,
             'all_probabilities': probabilities[0].tolist()
         }
@@ -134,8 +96,7 @@ class NetworkAttackDetector:
             'avg_inference_time_ms': np.mean(self.inference_times),
             'max_inference_time_ms': np.max(self.inference_times),
             'min_inference_time_ms': np.min(self.inference_times),
-            'throughput_per_second': 1000 / np.mean(self.inference_times),
-            'confidence_threshold': self.confidence_threshold
+            'throughput_per_second': 1000 / np.mean(self.inference_times)
         }
 
 class RealTimeMonitor:
@@ -166,18 +127,12 @@ class RealTimeMonitor:
             with open(self.result_file, 'w', encoding='utf-8') as f:
                 f.write("=== RESULTADOS DA ANÁLISE ===\n")
                 f.write(f"Data/Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write(f"Total de amostras processadas: {len(self.results)}\n")
-                f.write(f"Threshold de confiança: {self.detector.confidence_threshold}\n\n")
+                f.write(f"Total de amostras processadas: {len(self.results)}\n\n")
                 
                 attacks = [r for r in self.results if r['is_attack']]
-                low_confidence = [r for r in self.results if r['confidence'] < self.detector.confidence_threshold]
-                high_confidence = [r for r in self.results if r['confidence'] >= self.detector.confidence_threshold]
-                
-                f.write(f"Ataques críticos detectados: {len(attacks)}\n")
-                f.write(f"Taxa de ataques críticos: {len(attacks)/len(self.results)*100:.2f}%\n")
-                f.write(f"Atividade normal/baixo risco: {len(self.results) - len(attacks)}\n")
-                f.write(f"Predições baixa confiança: {len(low_confidence)}\n")
-                f.write(f"Predições alta confiança: {len(high_confidence)}\n\n")
+                f.write(f"Ataques detectados: {len(attacks)}\n")
+                f.write(f"Taxa de ataques: {len(attacks)/len(self.results)*100:.2f}%\n")
+                f.write(f"Tráfego normal: {len(self.results) - len(attacks)}\n\n")
                 
                 if attacks:
                     attack_types = {}
@@ -185,33 +140,17 @@ class RealTimeMonitor:
                         attack_type = attack['predicted_class']
                         attack_types[attack_type] = attack_types.get(attack_type, 0) + 1
                     
-                    f.write("=== TIPOS DE ATAQUES CRÍTICOS DETECTADOS ===\n")
+                    f.write("=== TIPOS DE ATAQUES DETECTADOS ===\n")
                     for attack_type, count in sorted(attack_types.items()):
                         f.write(f"{attack_type}: {count} ocorrências\n")
                     f.write("\n")
                 
-                # Analisar distribuição de confiança
-                confidence_levels = [r['confidence'] for r in self.results]
-                f.write("=== DISTRIBUIÇÃO DE CONFIANÇA ===\n")
-                f.write(f"Confiança média: {np.mean(confidence_levels):.3f}\n")
-                f.write(f"Confiança mediana: {np.median(confidence_levels):.3f}\n")
-                f.write(f"Confiança mínima: {min(confidence_levels):.3f}\n")
-                f.write(f"Confiança máxima: {max(confidence_levels):.3f}\n\n")
-                
                 f.write("=== DETALHES DAS DETECÇÕES ===\n")
                 for i, result in enumerate(self.results, 1):
-                    if result['is_attack']:
-                        status = "🚨 ATAQUE CRÍTICO"
-                    elif result['confidence'] >= self.detector.confidence_threshold:
-                        status = "⚠️ ATIVIDADE SUSPEITA"
-                    else:
-                        status = "✅ BAIXO RISCO"
-                        
+                    status = "🚨 ATAQUE" if result['is_attack'] else "✅ NORMAL"
                     f.write(f"Amostra {i}: {status}\n")
                     f.write(f"  Classe: {result['predicted_class']}\n")
                     f.write(f"  Confiança: {result['confidence']:.3f}\n")
-                    f.write(f"  É DDoS: {result.get('is_ddos', 'N/A')}\n")
-                    f.write(f"  Alta ameaça: {result.get('is_high_threat', 'N/A')}\n")
                     f.write(f"  Tempo de inferência: {result['inference_time_ms']:.2f} ms\n")
                     f.write(f"  Timestamp: {result['timestamp']}\n")
                     f.write("\n")
@@ -227,14 +166,11 @@ class RealTimeMonitor:
                 self.results.append(result)
                 
                 if result['is_attack']:
-                    message = f"🚨 ATAQUE CRÍTICO: {result['predicted_class']} (Confiança: {result['confidence']:.3f})"
+                    message = f"🚨 ATAQUE DETECTADO: {result['predicted_class']} (Confiança: {result['confidence']:.3f})"
                     self.save_result(message)
                     self.log_detection(result)
-                elif result['confidence'] >= self.detector.confidence_threshold:
-                    message = f"⚠️ ATIVIDADE SUSPEITA: {result['predicted_class']} (Confiança: {result['confidence']:.3f})"
-                    self.save_result(message)
                 else:
-                    message = f"✅ BAIXO RISCO: {result['predicted_class']} (Confiança: {result['confidence']:.3f})"
+                    message = f"✅ Tráfego normal (Confiança: {result['confidence']:.3f})"
                     self.save_result(message)
                 
                 self.data_queue.task_done()
