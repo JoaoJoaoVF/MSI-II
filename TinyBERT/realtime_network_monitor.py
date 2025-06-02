@@ -23,7 +23,7 @@ warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 class NetworkAttackDetector:
     def __init__(self, model_path, metadata_path, confidence_threshold=0.8):
         
-        print("Carregando modelo TinyBERT ultra-otimizado para IoT...")
+        print("Carregando modelo TinyBERT otimizado...")
         
         # Configurar ONNX Runtime para máxima eficiência em IoT
         providers = ['CPUExecutionProvider']
@@ -65,6 +65,7 @@ class NetworkAttackDetector:
         print(f"Threshold de confiança: {self.confidence_threshold}")
         print(f"Classes de baixa ameaça: {self.low_threat_classes}")
         print(f"Uso de memória inicial: {psutil.Process().memory_info().rss / 1024 / 1024:.1f}MB")
+        print(f"CPUs disponíveis: {psutil.cpu_count()}")
         
         self.total_predictions = 0
         self.attack_detections = 0
@@ -122,6 +123,7 @@ class NetworkAttackDetector:
         # Medir recursos antes da inferência
         process = psutil.Process()
         memory_before = process.memory_info().rss / 1024 / 1024
+        cpu_before = process.cpu_percent()
         
         features = self.preprocess_features(features_dict)
         
@@ -132,6 +134,7 @@ class NetworkAttackDetector:
         
         # Medir recursos após a inferência
         memory_after = process.memory_info().rss / 1024 / 1024
+        cpu_after = process.cpu_percent()
         
         predicted_class_idx = np.argmax(probabilities[0])
         predicted_class = self.classes[predicted_class_idx]
@@ -140,6 +143,7 @@ class NetworkAttackDetector:
         self.total_predictions += 1
         self.inference_times.append(inference_time)
         self.memory_usage.append(memory_after)
+        self.cpu_usage.append(cpu_after)
 
         # Lógica robusta para determinar ataques - verificar tráfego benigno primeiro
         is_benign = predicted_class.lower() in ['benigntraffic', 'benign', 'normal']
@@ -169,6 +173,8 @@ class NetworkAttackDetector:
                 print(f"⚠️ Latência alta para TinyBERT: {inference_time:.2f}ms")
             if memory_after > 200:  # Alerta se > 200MB para IoT
                 print(f"⚠️ Uso de memória alto para IoT: {memory_after:.1f}MB")
+            if cpu_after > 80:  # Alerta se CPU > 80%
+                print(f"⚠️ Uso de CPU alto: {cpu_after:.1f}%")
         
         # Limpeza periódica de cache para IoT
         if self.total_predictions % 500 == 0:
@@ -186,12 +192,16 @@ class NetworkAttackDetector:
             'confidence_threshold': self.confidence_threshold,
             'inference_time_ms': inference_time,
             'memory_usage_mb': memory_after,
+            'cpu_usage_percent': cpu_after,
             'all_probabilities': probabilities[0].tolist()
         }
     
     def _cleanup_cache(self):
-        """Limpeza de cache para dispositivos IoT"""
-        self._feature_cache.clear()
+        """Limpeza de cache balanceada"""
+        # Manter metade do cache para workstations
+        cache_items = list(self._feature_cache.items())
+        half_size = len(cache_items) // 2
+        self._feature_cache = dict(cache_items[-half_size:])
         gc.collect()
     
     def get_statistics(self):
@@ -207,9 +217,15 @@ class NetworkAttackDetector:
             'avg_inference_time_ms': np.mean(self.inference_times),
             'max_inference_time_ms': np.max(self.inference_times),
             'min_inference_time_ms': np.min(self.inference_times),
+            'std_inference_time_ms': np.std(self.inference_times),
+            'p95_inference_time_ms': np.percentile(self.inference_times, 95),
+            'p99_inference_time_ms': np.percentile(self.inference_times, 99),
             'throughput_per_second': 1000 / np.mean(self.inference_times),
             'avg_memory_usage_mb': np.mean(self.memory_usage),
             'max_memory_usage_mb': np.max(self.memory_usage),
+            'min_memory_usage_mb': np.min(self.memory_usage),
+            'avg_cpu_usage_percent': np.mean(self.cpu_usage),
+            'max_cpu_usage_percent': np.max(self.cpu_usage),
             'confidence_threshold': self.confidence_threshold,
             'cache_size': len(self._feature_cache),
             'cpu_count': psutil.cpu_count(),
@@ -258,16 +274,22 @@ class RealTimeMonitor:
                 f.write(f"Predições baixa confiança: {len(low_confidence)}\n")
                 f.write(f"Predições alta confiança: {len(high_confidence)}\n\n")
                 
-                # Performance específica para IoT
+                # Performance específica para workstation
                 inference_times = [r['inference_time_ms'] for r in self.results]
                 memory_usage = [r.get('memory_usage_mb', 0) for r in self.results]
+                cpu_usage = [r.get('cpu_usage_percent', 0) for r in self.results]
                 
-                f.write("=== PERFORMANCE IoT ===\n")
+                f.write("=== PERFORMANCE WORKSTATION ===\n")
                 f.write(f"Tempo médio de inferência: {np.mean(inference_times):.2f}ms\n")
                 f.write(f"Tempo máximo de inferência: {max(inference_times):.2f}ms\n")
+                f.write(f"Desvio padrão de inferência: {np.std(inference_times):.2f}ms\n")
+                f.write(f"P95 de inferência: {np.percentile(inference_times, 95):.2f}ms\n")
+                f.write(f"P99 de inferência: {np.percentile(inference_times, 99):.2f}ms\n")
                 f.write(f"Throughput médio: {1000/np.mean(inference_times):.1f} predições/segundo\n")
                 f.write(f"Uso médio de memória: {np.mean(memory_usage):.1f}MB\n")
-                f.write(f"Uso máximo de memória: {max(memory_usage):.1f}MB\n\n")
+                f.write(f"Uso máximo de memória: {max(memory_usage):.1f}MB\n")
+                f.write(f"Uso médio de CPU: {np.mean(cpu_usage):.1f}%\n")
+                f.write(f"Uso máximo de CPU: {max(cpu_usage):.1f}%\n\n")
                 
                 if attacks:
                     attack_types = {}
@@ -279,6 +301,15 @@ class RealTimeMonitor:
                     for attack_type, count in sorted(attack_types.items()):
                         f.write(f"{attack_type}: {count} ocorrências\n")
                     f.write("\n")
+                
+                # Analisar distribuição de confiança
+                confidence_levels = [r['confidence'] for r in self.results]
+                f.write("=== DISTRIBUIÇÃO DE CONFIANÇA ===\n")
+                f.write(f"Confiança média: {np.mean(confidence_levels):.3f}\n")
+                f.write(f"Confiança mediana: {np.median(confidence_levels):.3f}\n")
+                f.write(f"Confiança mínima: {min(confidence_levels):.3f}\n")
+                f.write(f"Confiança máxima: {max(confidence_levels):.3f}\n")
+                f.write(f"Desvio padrão confiança: {np.std(confidence_levels):.3f}\n\n")
                 
                 f.write("=== DETALHES DAS DETECÇÕES ===\n")
                 for i, result in enumerate(self.results, 1):
@@ -299,6 +330,7 @@ class RealTimeMonitor:
                     f.write(f"  Alta ameaça: {result.get('is_high_threat', 'N/A')}\n")
                     f.write(f"  Tempo de inferência: {result['inference_time_ms']:.2f} ms\n")
                     f.write(f"  Uso de memória: {result.get('memory_usage_mb', 'N/A')} MB\n")
+                    f.write(f"  Uso de CPU: {result.get('cpu_usage_percent', 'N/A')}%\n")
                     f.write(f"  Timestamp: {result['timestamp']}\n")
                     f.write("\n")
     
@@ -372,6 +404,7 @@ def simulate_network_data(csv_file, detector, monitor, delay=0.05):  # Delay men
             monitor.save_result(f"Taxa de ataques: {stats.get('attack_rate', 0):.3f}")
             monitor.save_result(f"Tempo médio: {stats.get('avg_inference_time_ms', 0):.2f} ms")
             monitor.save_result(f"Memória média: {stats.get('avg_memory_usage_mb', 0):.1f} MB")
+            monitor.save_result(f"CPU médio: {stats.get('avg_cpu_usage_percent', 0):.1f}%")
         
         time.sleep(delay)
 
@@ -415,8 +448,11 @@ def main():
         print(f"\nResultados do benchmark TinyBERT:")
         print(f"Predições: {stats['total_predictions']}")
         print(f"Tempo médio: {stats['avg_inference_time_ms']:.2f} ms")
+        print(f"Tempo P95: {stats['p95_inference_time_ms']:.2f} ms")
+        print(f"Tempo P99: {stats['p99_inference_time_ms']:.2f} ms")
         print(f"Throughput: {stats['throughput_per_second']:.2f} predições/segundo")
         print(f"Memória média: {stats['avg_memory_usage_mb']:.1f} MB")
+        print(f"CPU médio: {stats['avg_cpu_usage_percent']:.1f}%")
         print(f"Tamanho do cache: {stats['cache_size']}")
         
     elif args.simulate:
@@ -461,6 +497,7 @@ def main():
                 print(f"  É ataque: {result['is_attack']}")
                 print(f"  Tempo: {result['inference_time_ms']:.2f} ms")
                 print(f"  Memória: {result['memory_usage_mb']:.1f} MB")
+                print(f"  CPU: {result['cpu_usage_percent']:.1f}%")
                 
             except KeyboardInterrupt:
                 break
