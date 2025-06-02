@@ -71,6 +71,7 @@ class NetworkAttackDetector:
         self.attack_detections = 0
         self.inference_times = []
         self.memory_usage = []
+        self.cpu_usage = []   
         
         # Cache para otimização IoT
         self._feature_cache = {}
