@@ -71,8 +71,8 @@ class NetworkAttackDetector:
         self.attack_detections = 0
         self.inference_times = []
         self.memory_usage = []
-        self.cpu_usage = []   
-        
+        self.cpu_usage = []                 # inicializar antes de usar em predict()
+
         # Cache para otimização IoT
         self._feature_cache = {}
         
@@ -138,7 +138,16 @@ class NetworkAttackDetector:
         cpu_after = process.cpu_percent()
         
         predicted_class_idx = np.argmax(probabilities[0])
-        predicted_class = self.classes[predicted_class_idx]
+        raw_label = self.classes[predicted_class_idx]
+        
+        # Converter raw_label (normalmente int) de volta para string
+        try:
+            # Se label_encoder for um sklearn.preprocessing.LabelEncoder, faz inverse_transform
+            predicted_class = self.label_encoder.inverse_transform([raw_label])[0]
+        except Exception:
+            # Se falhar, converte em str
+            predicted_class = str(raw_label)
+        
         confidence = probabilities[0][predicted_class_idx]
         
         self.total_predictions += 1
@@ -156,7 +165,7 @@ class NetworkAttackDetector:
             high_confidence_attack = confidence > self.confidence_threshold
             is_high_threat = predicted_class not in self.low_threat_classes
             
-            ddos_classes = [cls for cls in self.classes if 'DDoS' in cls or 'DoS' in cls]
+            ddos_classes = [cls for cls in self.classes if isinstance(cls, str) and ('DDoS' in cls or 'DoS' in cls)]
             is_ddos = predicted_class in ddos_classes
             
             is_critical_attack = (
@@ -188,8 +197,8 @@ class NetworkAttackDetector:
             'confidence': float(confidence),
             'is_attack': is_critical_attack,
             'is_benign': is_benign,
-            'is_high_threat': predicted_class not in self.low_threat_classes if not is_benign else False,
-            'is_ddos': predicted_class in [cls for cls in self.classes if 'DDoS' in cls or 'DoS' in cls] if not is_benign else False,
+            'is_high_threat': (predicted_class not in self.low_threat_classes) if not is_benign else False,
+            'is_ddos': is_ddos if not is_benign else False,
             'confidence_threshold': self.confidence_threshold,
             'inference_time_ms': inference_time,
             'memory_usage_mb': memory_after,
@@ -199,7 +208,6 @@ class NetworkAttackDetector:
     
     def _cleanup_cache(self):
         """Limpeza de cache balanceada"""
-        # Manter metade do cache para workstations
         cache_items = list(self._feature_cache.items())
         half_size = len(cache_items) // 2
         self._feature_cache = dict(cache_items[-half_size:])
@@ -221,7 +229,7 @@ class NetworkAttackDetector:
             'std_inference_time_ms': np.std(self.inference_times),
             'p95_inference_time_ms': np.percentile(self.inference_times, 95),
             'p99_inference_time_ms': np.percentile(self.inference_times, 99),
-            'throughput_per_second': 1000 / np.mean(self.inference_times),
+            'throughput_per_second': 1000 / np.mean(self.inference_times) if self.inference_times else 0,
             'avg_memory_usage_mb': np.mean(self.memory_usage),
             'max_memory_usage_mb': np.max(self.memory_usage),
             'min_memory_usage_mb': np.min(self.memory_usage),
@@ -394,7 +402,8 @@ def simulate_network_data(csv_file, detector, monitor, delay=0.05):  # Delay men
     monitor.save_result(message)
     
     for idx, row in df.iterrows():
-        features_dict = row.drop('label').to_dict()
+        # drop label sem erro, caso não exista
+        features_dict = row.drop(labels=['label'], errors='ignore').to_dict()
         
         monitor.add_data(features_dict)
         
@@ -508,4 +517,4 @@ def main():
         parser.print_help()
 
 if __name__ == '__main__':
-    main() 
+    main()
