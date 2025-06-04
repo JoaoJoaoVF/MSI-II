@@ -49,18 +49,17 @@ class NetworkAttackDetector:
         self.feature_names = self.metadata['feature_names']
         self.classes = self.metadata['classes']
 
-        # Obter nomes legíveis para cada classe
         try:
-            # Se label_encoder for sklearn.preprocessing.LabelEncoder
-            self.class_names = self.label_encoder.inverse_transform(self.classes)
+            original_labels = list(self.label_encoder.classes_)
+            encoded = list(self.label_encoder.transform(original_labels))
+            self.class_map = {int(enc): label for enc, label in zip(encoded, original_labels)}
         except Exception:
-            # Caso não seja possível usar o label_encoder diretamente
-            self.class_names = [str(c) for c in self.classes]
+            self.class_map = {c: str(c) for c in self.classes}
 
-        # Configurar threshold de confiança
+        self.class_names = [self.class_map.get(c, str(c)) for c in self.classes]
+
         self.confidence_threshold = confidence_threshold
 
-        # Definir classes consideradas menos perigosas (podem ser ajustadas)
         self.low_threat_classes = [
             'VulnerabilityScan',  # Menos crítico que DDoS
             'Recon-PingSweep',    # Reconhecimento básico
@@ -69,7 +68,8 @@ class NetworkAttackDetector:
 
         print(f"TinyBERT carregado com sucesso!")
         print(f"Classes detectáveis (códigos): {self.classes}")
-        print(f"Nomes das classes detectáveis: {list(self.class_names)}")
+        print(f"Mapeamento de classes (código->nome): {self.class_map}")
+        print(f"Nomes das classes detectáveis: {self.class_names}")
         print(f"Threshold de confiança: {self.confidence_threshold}")
         print(f"Classes de baixa ameaça: {self.low_threat_classes}")
         print(f"Uso de memória inicial: {psutil.Process().memory_info().rss / 1024 / 1024:.1f}MB")
@@ -146,13 +146,7 @@ class NetworkAttackDetector:
         predicted_class_idx = np.argmax(probabilities[0])
         raw_label = self.classes[predicted_class_idx]
 
-        # Converter raw_label (potencialmente numérico) para string
-        try:
-            # Se label_encoder for sklearn.preprocessing.LabelEncoder
-            label_from_encoder = self.label_encoder.inverse_transform([raw_label])[0]
-            predicted_class = str(label_from_encoder)
-        except Exception:
-            predicted_class = str(raw_label)
+        predicted_class = self.class_map.get(raw_label, str(raw_label))
 
         confidence = probabilities[0][predicted_class_idx]
 
@@ -161,7 +155,6 @@ class NetworkAttackDetector:
         self.memory_usage.append(memory_after)
         self.cpu_usage.append(cpu_after)
 
-        # Lógica robusta para determinar ataques - verificar tráfego benigno primeiro
         is_benign = predicted_class.lower() in ['benigntraffic', 'benign', 'normal']
 
         if is_benign:
@@ -172,8 +165,8 @@ class NetworkAttackDetector:
             is_high_threat = predicted_class not in self.low_threat_classes
 
             ddos_classes = [
-                cls for cls in self.classes
-                if isinstance(cls, str) and ('DDoS' in cls or 'DoS' in cls)
+                name for name in self.class_names
+                if 'DDoS' in name or 'DoS' in name
             ]
             is_ddos = predicted_class in ddos_classes
 
