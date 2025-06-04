@@ -49,6 +49,14 @@ class NetworkAttackDetector:
         self.feature_names = self.metadata['feature_names']
         self.classes = self.metadata['classes']
 
+        # Obter nomes legíveis para cada classe
+        try:
+            # Se label_encoder for sklearn.preprocessing.LabelEncoder
+            self.class_names = self.label_encoder.inverse_transform(self.classes)
+        except Exception:
+            # Caso não seja possível usar o label_encoder diretamente
+            self.class_names = [str(c) for c in self.classes]
+
         # Configurar threshold de confiança
         self.confidence_threshold = confidence_threshold
 
@@ -60,7 +68,8 @@ class NetworkAttackDetector:
         ]
 
         print(f"TinyBERT carregado com sucesso!")
-        print(f"Classes detectáveis: {self.classes}")
+        print(f"Classes detectáveis (códigos): {self.classes}")
+        print(f"Nomes das classes detectáveis: {list(self.class_names)}")
         print(f"Threshold de confiança: {self.confidence_threshold}")
         print(f"Classes de baixa ameaça: {self.low_threat_classes}")
         print(f"Uso de memória inicial: {psutil.Process().memory_info().rss / 1024 / 1024:.1f}MB")
@@ -293,6 +302,7 @@ class RealTimeMonitor:
                 f.write(f"Throughput médio: {1000/np.mean(inference_times):.1f} predições/segundo\n")
                 f.write(f"Uso médio de memória: {np.mean(memory_usage):.1f}MB\n")
                 f.write(f"Uso máximo de memória: {max(memory_usage):.1f}MB\n")
+                f.write(f"Uso mínimo de memória: {min(memory_usage):.1f}MB\n")
                 f.write(f"Uso médio de CPU: {np.mean(cpu_usage):.1f}%\n")
                 f.write(f"Uso máximo de CPU: {max(cpu_usage):.1f}%\n\n")
 
@@ -305,8 +315,7 @@ class RealTimeMonitor:
                     f.write("=== TIPOS DE ATAQUES CRÍTICOS DETECTADOS ===\n")
                     for attack_type, count in sorted(attack_types.items()):
                         f.write(f"{attack_type}: {count} ocorrências\n")
-                    f.write("\n")
-
+        
                 # Analisar distribuição de confiança
                 confidence_levels = [r['confidence'] for r in self.results]
                 f.write("=== DISTRIBUIÇÃO DE CONFIANÇA ===\n")
@@ -322,7 +331,7 @@ class RealTimeMonitor:
                         status = "🚨 ATAQUE CRÍTICO"
                     elif result.get('is_benign', False):
                         status = "✅ TRÁFEGO NORMAL"
-                    elif result['confidence'] >= self.detector.confidence_threshold:
+                    elif result['confidence'] > self.detector.confidence_threshold:
                         status = "⚠️ ATIVIDADE SUSPEITA"
                     else:
                         status = "🔍 BAIXO RISCO"
@@ -422,11 +431,7 @@ def main():
     args = parser.parse_args()
 
     result_file = None
-    if args.simulate:
-        csv_basename = os.path.splitext(os.path.basename(args.simulate))[0]
-        result_file = f"result-tinybert-part-{csv_basename}.txt"
-        print(f"Resultados TinyBERT serão salvos em: {result_file}")
-    elif args.output:
+    if args.output:
         result_file = args.output
         print(f"Resultados serão salvos em: {result_file}")
 
@@ -496,6 +501,16 @@ def main():
             except KeyboardInterrupt:
                 break
 
+    elif args.benchmark:
+        print("Iniciando bench de performance TinyBERT...")
+        dummy_features = {name: 0.0 for name in detector.feature_names}
+        times = []
+        for _ in range(100):
+            start = time.perf_counter()
+            detector.predict(dummy_features, verbose=False)
+            end = time.perf_counter()
+            times.append((end - start) * 1000)
+        print(f"Tempo médio de inferência (100 runs): {np.mean(times):.2f} ms")
     else:
         print("Use --simulate, --interactive ou --benchmark")
         parser.print_help()

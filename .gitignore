@@ -2,3 +2,4 @@ data/*
 DistilBERT/venv/*
 DistilBERT/__pycache__/*
 MiniLM/.venv/*
+venv/*
