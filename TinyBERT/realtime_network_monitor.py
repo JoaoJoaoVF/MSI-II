@@ -110,8 +110,13 @@ class NetworkAttackDetector:
         self.total_predictions += 1
         self.inference_times.append(inference_time)
 
-        # Simplificar a classificação para apenas "ataque" ou "normal"
-        is_benign = predicted_class.lower() in ['benigntraffic', 'benign', 'normal']
+        # Fix: Handle both string and integer class representations
+        is_benign = False
+        if isinstance(predicted_class, str):
+            is_benign = predicted_class.lower() in ['benigntraffic', 'benign', 'normal']
+        elif predicted_class == 0:  # Assume class 0 is benign if numeric
+            is_benign = True
+            
         is_attack = not is_benign
         
         # Atualizar estatísticas
@@ -439,8 +444,13 @@ def simulate_network_data(csv_file, detector, monitor, delay=0.1):  # Delay bala
         if has_labels:
             # Determinar se o rótulo indica ataque (1) ou normal (0)
             label_value = row['label']
+            
+            # Fix: Handle both string and integer labels
             is_attack = 1
-            if isinstance(label_value, str) and label_value.lower() in ['benigntraffic', 'benign', 'normal']:
+            if isinstance(label_value, str):
+                if label_value.lower() in ['benigntraffic', 'benign', 'normal']:
+                    is_attack = 0
+            elif label_value == 0:  # Assume 0 is benign traffic if numeric
                 is_attack = 0
             
             features_dict = row.drop('label').to_dict()
@@ -458,6 +468,7 @@ def simulate_network_data(csv_file, detector, monitor, delay=0.1):  # Delay bala
             monitor.save_result(f"Tempo médio: {stats.get('avg_inference_time_ms', 0):.2f} ms")
         
         time.sleep(delay)
+
 
 def main():
     parser = argparse.ArgumentParser(description='Detector de Ataques de Rede TinyBERT - Otimizado para Workstations')
