@@ -1,0 +1,1317 @@
+=== RESULTADOS DA ANÁLISE MiniLM ===
+Data/Hora: 2025-06-12 15:14:50
+Modelo: MiniLM (Otimizado para Workstations)
+Total de amostras processadas: 111
+Threshold de confiança: 0.8
+
+Ataques detectados: 104
+Tráfego normal: 7
+Taxa de ataques: 93.69%
+
+=== ESTATÍSTICAS DE CONFIANÇA ===
+Predições com alta confiança: 41 (36.94%)
+Predições com baixa confiança: 70 (63.06%)
+Confiança média: 0.7721
+Confiança mediana: 0.7421
+Confiança mínima: 0.5005
+Confiança máxima: 0.9995
+Desvio padrão da confiança: 0.1768
+
+=== INCIDÊNCIA DE ATAQUES ===
+DDoS-ICMP_Flood: 19 ocorrências (17.12%)
+DDoS-TCP_Flood: 18 ocorrências (16.22%)
+DDoS-UDP_Flood: 17 ocorrências (15.32%)
+DDoS-SYN_Flood: 14 ocorrências (12.61%)
+DDoS-SynonymousIP_Flood: 10 ocorrências (9.01%)
+DDoS-RSTFINFlood: 7 ocorrências (6.31%)
+DDoS-PSHACK_Flood: 6 ocorrências (5.41%)
+Mirai-greeth_flood: 5 ocorrências (4.50%)
+Mirai-udpplain: 4 ocorrências (3.60%)
+DoS-TCP_Flood: 2 ocorrências (1.80%)
+DoS-UDP_Flood: 1 ocorrências (0.90%)
+DDoS-ICMP_Fragmentation: 1 ocorrências (0.90%)
+Tráfego Normal: 7 ocorrências (6.31%)
+
+=== MÉTRICAS DE DESEMPENHO ===
+Tempo médio de inferência: 1.90 ms
+Tempo máximo de inferência: 16.21 ms
+Tempo mínimo de inferência: 0.75 ms
+Desvio padrão da inferência: 2.70 ms
+Percentil 95 (P95) da inferência: 7.92 ms
+Percentil 99 (P99) da inferência: 14.66 ms
+Throughput: 527.43 predições/segundo
+Uso médio de CPU: 25.97%
+Uso máximo de CPU: 100.00%
+Uso médio de memória: 20.40%
+Uso máximo de memória: 20.40%
+
+=== DETALHES DE TODAS AS DETECÇÕES ===
+
+[1] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:38.995188
+    Confiança: 0.9995
+    Tempo de inferência: 2.13 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[2] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:39.508691
+    Confiança: 0.9995
+    Tempo de inferência: 1.39 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[3] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:40.784090
+    Confiança: 0.9995
+    Tempo de inferência: 0.91 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[4] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:42.452394
+    Confiança: 0.9995
+    Tempo de inferência: 1.20 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[5] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:42.654628
+    Confiança: 0.9995
+    Tempo de inferência: 0.88 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[6] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:42.997940
+    Confiança: 0.9995
+    Tempo de inferência: 7.63 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[7] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:43.426490
+    Confiança: 0.9995
+    Tempo de inferência: 1.03 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[8] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:43.837356
+    Confiança: 0.9995
+    Tempo de inferência: 0.85 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[9] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:44.346337
+    Confiança: 0.9995
+    Tempo de inferência: 1.19 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[10] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:44.549341
+    Confiança: 0.9995
+    Tempo de inferência: 0.85 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[11] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:45.974336
+    Confiança: 0.9995
+    Tempo de inferência: 1.15 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[12] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:47.529311
+    Confiança: 0.9995
+    Tempo de inferência: 1.25 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[13] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:49.535738
+    Confiança: 0.9995
+    Tempo de inferência: 1.04 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[14] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:49.848132
+    Confiança: 0.9995
+    Tempo de inferência: 1.13 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[15] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:50.161469
+    Confiança: 0.9995
+    Tempo de inferência: 1.18 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[16] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:43.939419
+    Confiança: 0.9995
+    Tempo de inferência: 1.09 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-UDP_Flood: 0.0001
+      - DDoS-PSHACK_Flood: 0.0001
+    ----------------------------------------
+
+[17] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:39.620690
+    Confiança: 0.9995
+    Tempo de inferência: 11.43 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9995
+      - DDoS-PSHACK_Flood: 0.0001
+      - DDoS-UDP_Flood: 0.0001
+    ----------------------------------------
+
+[18] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:49.121418
+    Confiança: 0.9994
+    Tempo de inferência: 1.29 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9994
+      - DDoS-PSHACK_Flood: 0.0001
+      - DDoS-UDP_Flood: 0.0001
+    ----------------------------------------
+
+[19] ATAQUE: DDoS-ICMP_Flood
+    Timestamp: 2025-06-12T15:14:46.279373
+    Confiança: 0.9994
+    Tempo de inferência: 0.92 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Flood: 0.9994
+      - DDoS-PSHACK_Flood: 0.0001
+      - DoS-UDP_Flood: 0.0001
+    ----------------------------------------
+
+[20] ATAQUE: DDoS-RSTFINFlood
+    Timestamp: 2025-06-12T15:14:39.412923
+    Confiança: 0.9993
+    Tempo de inferência: 8.08 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-RSTFINFlood: 0.9993
+      - DoS-SYN_Flood: 0.0001
+      - DDoS-UDP_Flood: 0.0001
+    ----------------------------------------
+
+[21] ATAQUE: DDoS-RSTFINFlood
+    Timestamp: 2025-06-12T15:14:41.094128
+    Confiança: 0.9993
+    Tempo de inferência: 0.93 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-RSTFINFlood: 0.9993
+      - DoS-SYN_Flood: 0.0001
+      - DDoS-UDP_Flood: 0.0001
+    ----------------------------------------
+
+[22] ATAQUE: DDoS-RSTFINFlood
+    Timestamp: 2025-06-12T15:14:42.044104
+    Confiança: 0.9993
+    Tempo de inferência: 0.87 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-RSTFINFlood: 0.9993
+      - DoS-SYN_Flood: 0.0001
+      - DDoS-UDP_Flood: 0.0001
+    ----------------------------------------
+
+[23] ATAQUE: DDoS-RSTFINFlood
+    Timestamp: 2025-06-12T15:14:45.162326
+    Confiança: 0.9993
+    Tempo de inferência: 1.20 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-RSTFINFlood: 0.9993
+      - DoS-SYN_Flood: 0.0001
+      - DDoS-UDP_Flood: 0.0001
+    ----------------------------------------
+
+[24] ATAQUE: DDoS-RSTFINFlood
+    Timestamp: 2025-06-12T15:14:46.177445
+    Confiança: 0.9993
+    Tempo de inferência: 1.09 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-RSTFINFlood: 0.9993
+      - DoS-SYN_Flood: 0.0001
+      - DDoS-UDP_Flood: 0.0001
+    ----------------------------------------
+
+[25] ATAQUE: DDoS-PSHACK_Flood
+    Timestamp: 2025-06-12T15:14:48.148633
+    Confiança: 0.9992
+    Tempo de inferência: 0.83 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-PSHACK_Flood: 0.9992
+      - DDoS-TCP_Flood: 0.0001
+      - DoS-SYN_Flood: 0.0001
+    ----------------------------------------
+
+[26] ATAQUE: DDoS-PSHACK_Flood
+    Timestamp: 2025-06-12T15:14:40.683461
+    Confiança: 0.9992
+    Tempo de inferência: 2.60 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-PSHACK_Flood: 0.9992
+      - DDoS-TCP_Flood: 0.0001
+      - DoS-SYN_Flood: 0.0001
+    ----------------------------------------
+
+[27] ATAQUE: DDoS-PSHACK_Flood
+    Timestamp: 2025-06-12T15:14:50.370470
+    Confiança: 0.9992
+    Tempo de inferência: 1.32 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-PSHACK_Flood: 0.9992
+      - DDoS-TCP_Flood: 0.0001
+      - DoS-SYN_Flood: 0.0001
+    ----------------------------------------
+
+[28] ATAQUE: DDoS-RSTFINFlood
+    Timestamp: 2025-06-12T15:14:41.612510
+    Confiança: 0.9992
+    Tempo de inferência: 0.96 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-RSTFINFlood: 0.9992
+      - DoS-SYN_Flood: 0.0001
+      - DoS-TCP_Flood: 0.0001
+    ----------------------------------------
+
+[29] ATAQUE: DDoS-RSTFINFlood
+    Timestamp: 2025-06-12T15:14:47.646020
+    Confiança: 0.9992
+    Tempo de inferência: 16.21 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-RSTFINFlood: 0.9992
+      - DoS-SYN_Flood: 0.0001
+      - DoS-TCP_Flood: 0.0001
+    ----------------------------------------
+
+[30] ATAQUE: DDoS-PSHACK_Flood
+    Timestamp: 2025-06-12T15:14:47.010021
+    Confiança: 0.9985
+    Tempo de inferência: 2.06 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-PSHACK_Flood: 0.9985
+      - DoS-SYN_Flood: 0.0003
+      - DoS-TCP_Flood: 0.0002
+    ----------------------------------------
+
+[31] ATAQUE: DDoS-PSHACK_Flood
+    Timestamp: 2025-06-12T15:14:42.887441
+    Confiança: 0.9982
+    Tempo de inferência: 1.63 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-PSHACK_Flood: 0.9982
+      - DDoS-TCP_Flood: 0.0005
+      - DoS-TCP_Flood: 0.0004
+    ----------------------------------------
+
+[32] ATAQUE: DDoS-PSHACK_Flood
+    Timestamp: 2025-06-12T15:14:48.769233
+    Confiança: 0.9981
+    Tempo de inferência: 1.52 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-PSHACK_Flood: 0.9981
+      - DoS-TCP_Flood: 0.0003
+      - DDoS-TCP_Flood: 0.0003
+    ----------------------------------------
+
+[33] ATAQUE: Mirai-udpplain
+    Timestamp: 2025-06-12T15:14:44.141567
+    Confiança: 0.9881
+    Tempo de inferência: 0.75 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - Mirai-udpplain: 0.9881
+      - MITM-ArpSpoofing: 0.0053
+      - DoS-UDP_Flood: 0.0015
+    ----------------------------------------
+
+[34] ATAQUE: Mirai-udpplain
+    Timestamp: 2025-06-12T15:14:42.349708
+    Confiança: 0.9872
+    Tempo de inferência: 1.26 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - Mirai-udpplain: 0.9872
+      - MITM-ArpSpoofing: 0.0060
+      - DoS-UDP_Flood: 0.0014
+    ----------------------------------------
+
+[35] ATAQUE: Mirai-udpplain
+    Timestamp: 2025-06-12T15:14:46.688559
+    Confiança: 0.9871
+    Tempo de inferência: 1.06 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - Mirai-udpplain: 0.9871
+      - MITM-ArpSpoofing: 0.0039
+      - DoS-UDP_Flood: 0.0026
+    ----------------------------------------
+
+[36] ATAQUE: Mirai-udpplain
+    Timestamp: 2025-06-12T15:14:47.114682
+    Confiança: 0.9848
+    Tempo de inferência: 1.00 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - Mirai-udpplain: 0.9848
+      - MITM-ArpSpoofing: 0.0038
+      - DoS-UDP_Flood: 0.0034
+    ----------------------------------------
+
+[37] ATAQUE: DoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:45.465492
+    Confiança: 0.9625
+    Tempo de inferência: 0.90 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DoS-UDP_Flood: 0.9625
+      - DDoS-UDP_Flood: 0.0228
+      - Mirai-udpplain: 0.0116
+    ----------------------------------------
+
+[38] ATAQUE: DDoS-ICMP_Fragmentation
+    Timestamp: 2025-06-12T15:14:48.915332
+    Confiança: 0.9523
+    Tempo de inferência: 1.18 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-ICMP_Fragmentation: 0.9523
+      - DDoS-ACK_Fragmentation: 0.0159
+      - DoS-UDP_Flood: 0.0106
+    ----------------------------------------
+
+[39] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:50.057744
+    Confiança: 0.8003
+    Tempo de inferência: 1.24 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.8003
+      - DDoS-SynonymousIP_Flood: 0.1133
+      - DoS-SYN_Flood: 0.0810
+    ----------------------------------------
+
+[40] ATAQUE: DDoS-SynonymousIP_Flood
+    Timestamp: 2025-06-12T15:14:46.798996
+    Confiança: 0.8001
+    Tempo de inferência: 0.97 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SynonymousIP_Flood: 0.8001
+      - DoS-SYN_Flood: 0.1835
+      - DDoS-SYN_Flood: 0.0075
+    ----------------------------------------
+
+[41] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:43.194131
+    Confiança: 0.8001
+    Tempo de inferência: 1.22 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.8001
+      - DDoS-SynonymousIP_Flood: 0.1134
+      - DoS-SYN_Flood: 0.0810
+    ----------------------------------------
+
+[42] ATAQUE: DDoS-SynonymousIP_Flood
+    Timestamp: 2025-06-12T15:14:45.363451
+    Confiança: 0.7959
+    Tempo de inferência: 0.96 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SynonymousIP_Flood: 0.7959
+      - DoS-SYN_Flood: 0.1898
+      - DDoS-SYN_Flood: 0.0094
+    ----------------------------------------
+
+[43] ATAQUE: DDoS-SynonymousIP_Flood
+    Timestamp: 2025-06-12T15:14:44.039719
+    Confiança: 0.7952
+    Tempo de inferência: 0.91 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SynonymousIP_Flood: 0.7952
+      - DoS-SYN_Flood: 0.1906
+      - DDoS-SYN_Flood: 0.0100
+    ----------------------------------------
+
+[44] ATAQUE: DDoS-SynonymousIP_Flood
+    Timestamp: 2025-06-12T15:14:40.991124
+    Confiança: 0.7830
+    Tempo de inferência: 0.99 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SynonymousIP_Flood: 0.7830
+      - DoS-SYN_Flood: 0.1998
+      - DDoS-SYN_Flood: 0.0148
+    ----------------------------------------
+
+[45] ATAQUE: DDoS-SynonymousIP_Flood
+    Timestamp: 2025-06-12T15:14:39.820469
+    Confiança: 0.7828
+    Tempo de inferência: 1.14 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SynonymousIP_Flood: 0.7828
+      - DoS-SYN_Flood: 0.1912
+      - DDoS-SYN_Flood: 0.0226
+    ----------------------------------------
+
+[46] ATAQUE: DDoS-SynonymousIP_Flood
+    Timestamp: 2025-06-12T15:14:39.197950
+    Confiança: 0.7821
+    Tempo de inferência: 1.03 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SynonymousIP_Flood: 0.7821
+      - DoS-SYN_Flood: 0.2019
+      - DDoS-SYN_Flood: 0.0131
+    ----------------------------------------
+
+[47] ATAQUE: DDoS-SynonymousIP_Flood
+    Timestamp: 2025-06-12T15:14:49.953597
+    Confiança: 0.7797
+    Tempo de inferência: 1.04 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SynonymousIP_Flood: 0.7797
+      - DoS-SYN_Flood: 0.2050
+      - DDoS-SYN_Flood: 0.0109
+    ----------------------------------------
+
+[48] ATAQUE: DDoS-SynonymousIP_Flood
+    Timestamp: 2025-06-12T15:14:45.769523
+    Confiança: 0.7688
+    Tempo de inferência: 0.99 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SynonymousIP_Flood: 0.7688
+      - DoS-SYN_Flood: 0.2019
+      - DDoS-SYN_Flood: 0.0279
+    ----------------------------------------
+
+[49] ATAQUE: DDoS-SynonymousIP_Flood
+    Timestamp: 2025-06-12T15:14:47.325188
+    Confiança: 0.7686
+    Tempo de inferência: 1.30 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SynonymousIP_Flood: 0.7686
+      - DoS-SYN_Flood: 0.2010
+      - DDoS-SYN_Flood: 0.0289
+    ----------------------------------------
+
+[50] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:40.478705
+    Confiança: 0.7632
+    Tempo de inferência: 1.28 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7632
+      - DoS-UDP_Flood: 0.2332
+      - DDoS-RSTFINFlood: 0.0009
+    ----------------------------------------
+
+[51] TRÁFEGO NORMAL: BenignTraffic
+    Timestamp: 2025-06-12T15:14:47.752091
+    Confiança: 0.7540
+    Tempo de inferência: 14.83 ms
+    Predição correta: ✗ NÃO
+    Top 3 classes mais prováveis:
+      - BenignTraffic: 0.7540
+      - MITM-ArpSpoofing: 0.0992
+      - DNS_Spoofing: 0.0511
+    ----------------------------------------
+
+[52] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:44.651180
+    Confiança: 0.7500
+    Tempo de inferência: 1.09 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.7500
+      - DoS-TCP_Flood: 0.2427
+      - DDoS-PSHACK_Flood: 0.0018
+    ----------------------------------------
+
+[53] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:49.743674
+    Confiança: 0.7454
+    Tempo de inferência: 0.99 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7454
+      - DoS-UDP_Flood: 0.2517
+      - DDoS-RSTFINFlood: 0.0006
+    ----------------------------------------
+
+[54] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:41.817245
+    Confiança: 0.7442
+    Tempo de inferência: 1.06 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7442
+      - DoS-UDP_Flood: 0.2530
+      - DDoS-RSTFINFlood: 0.0006
+    ----------------------------------------
+
+[55] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:49.325490
+    Confiança: 0.7427
+    Tempo de inferência: 1.13 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7427
+      - DoS-UDP_Flood: 0.2544
+      - DDoS-RSTFINFlood: 0.0006
+    ----------------------------------------
+
+[56] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:39.095651
+    Confiança: 0.7421
+    Tempo de inferência: 1.02 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7421
+      - DoS-UDP_Flood: 0.2550
+      - DDoS-RSTFINFlood: 0.0007
+    ----------------------------------------
+
+[57] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:48.564853
+    Confiança: 0.7418
+    Tempo de inferência: 0.96 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7418
+      - DoS-UDP_Flood: 0.2554
+      - DDoS-RSTFINFlood: 0.0006
+    ----------------------------------------
+
+[58] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:44.243493
+    Confiança: 0.7400
+    Tempo de inferência: 0.92 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7400
+      - DoS-UDP_Flood: 0.2570
+      - DDoS-RSTFINFlood: 0.0007
+    ----------------------------------------
+
+[59] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:41.717387
+    Confiança: 0.7400
+    Tempo de inferência: 3.65 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7400
+      - DoS-UDP_Flood: 0.2572
+      - DDoS-RSTFINFlood: 0.0006
+    ----------------------------------------
+
+[60] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:46.586227
+    Confiança: 0.7397
+    Tempo de inferência: 0.95 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7397
+      - DoS-UDP_Flood: 0.2574
+      - DDoS-RSTFINFlood: 0.0006
+    ----------------------------------------
+
+[61] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:48.250863
+    Confiança: 0.7388
+    Tempo de inferência: 1.18 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7388
+      - DoS-UDP_Flood: 0.2582
+      - DDoS-RSTFINFlood: 0.0007
+    ----------------------------------------
+
+[62] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:39.300398
+    Confiança: 0.7373
+    Tempo de inferência: 0.93 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7373
+      - DoS-UDP_Flood: 0.2597
+      - DDoS-RSTFINFlood: 0.0007
+    ----------------------------------------
+
+[63] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:48.047290
+    Confiança: 0.7372
+    Tempo de inferência: 1.21 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.7372
+      - DoS-UDP_Flood: 0.2598
+      - DDoS-RSTFINFlood: 0.0007
+    ----------------------------------------
+
+[64] ATAQUE: DDoS-SynonymousIP_Flood
+    Timestamp: 2025-06-12T15:14:49.223525
+    Confiança: 0.6850
+    Tempo de inferência: 1.28 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SynonymousIP_Flood: 0.6850
+      - DoS-SYN_Flood: 0.2918
+      - DDoS-SYN_Flood: 0.0204
+    ----------------------------------------
+
+[65] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:46.901748
+    Confiança: 0.6781
+    Tempo de inferência: 1.76 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6781
+      - DoS-TCP_Flood: 0.3195
+      - DDoS-UDP_Flood: 0.0004
+    ----------------------------------------
+
+[66] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:47.426745
+    Confiança: 0.6707
+    Tempo de inferência: 1.08 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.6707
+      - DoS-UDP_Flood: 0.3255
+      - DDoS-RSTFINFlood: 0.0007
+    ----------------------------------------
+
+[67] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:43.325543
+    Confiança: 0.6697
+    Tempo de inferência: 1.54 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.6697
+      - DoS-SYN_Flood: 0.1912
+      - DDoS-SynonymousIP_Flood: 0.1363
+    ----------------------------------------
+
+[68] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:44.854214
+    Confiança: 0.6654
+    Tempo de inferência: 0.81 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.6654
+      - DoS-SYN_Flood: 0.1869
+      - DDoS-SynonymousIP_Flood: 0.1450
+    ----------------------------------------
+
+[69] TRÁFEGO NORMAL: BenignTraffic
+    Timestamp: 2025-06-12T15:14:39.928563
+    Confiança: 0.6599
+    Tempo de inferência: 1.48 ms
+    Predição correta: ✗ NÃO
+    Top 3 classes mais prováveis:
+      - BenignTraffic: 0.6599
+      - MITM-ArpSpoofing: 0.0918
+      - DNS_Spoofing: 0.0729
+    ----------------------------------------
+
+[70] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:40.587744
+    Confiança: 0.6594
+    Tempo de inferência: 7.75 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.6594
+      - DoS-SYN_Flood: 0.1874
+      - DDoS-SynonymousIP_Flood: 0.1506
+    ----------------------------------------
+
+[71] TRÁFEGO NORMAL: BenignTraffic
+    Timestamp: 2025-06-12T15:14:43.629980
+    Confiança: 0.6561
+    Tempo de inferência: 0.77 ms
+    Predição correta: ✗ NÃO
+    Top 3 classes mais prováveis:
+      - BenignTraffic: 0.6561
+      - MITM-ArpSpoofing: 0.2330
+      - DNS_Spoofing: 0.0388
+    ----------------------------------------
+
+[72] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:42.146201
+    Confiança: 0.6408
+    Tempo de inferência: 0.94 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.6408
+      - DoS-UDP_Flood: 0.3560
+      - DDoS-RSTFINFlood: 0.0006
+    ----------------------------------------
+
+[73] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:39.717255
+    Confiança: 0.6335
+    Tempo de inferência: 0.86 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6335
+      - DoS-TCP_Flood: 0.3649
+      - DDoS-SYN_Flood: 0.0002
+    ----------------------------------------
+
+[74] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:40.885740
+    Confiança: 0.6335
+    Tempo de inferência: 0.99 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6335
+      - DoS-TCP_Flood: 0.3649
+      - DDoS-SYN_Flood: 0.0002
+    ----------------------------------------
+
+[75] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:42.247359
+    Confiança: 0.6335
+    Tempo de inferência: 1.10 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6335
+      - DoS-TCP_Flood: 0.3649
+      - DDoS-SYN_Flood: 0.0002
+    ----------------------------------------
+
+[76] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:43.527796
+    Confiança: 0.6335
+    Tempo de inferência: 0.85 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6335
+      - DoS-TCP_Flood: 0.3649
+      - DDoS-SYN_Flood: 0.0002
+    ----------------------------------------
+
+[77] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:46.075706
+    Confiança: 0.6335
+    Tempo de inferência: 0.95 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6335
+      - DoS-TCP_Flood: 0.3649
+      - DDoS-SYN_Flood: 0.0002
+    ----------------------------------------
+
+[78] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:46.483811
+    Confiança: 0.6335
+    Tempo de inferência: 1.00 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6335
+      - DoS-TCP_Flood: 0.3649
+      - DDoS-SYN_Flood: 0.0002
+    ----------------------------------------
+
+[79] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:47.942655
+    Confiança: 0.6335
+    Tempo de inferência: 1.46 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6335
+      - DoS-TCP_Flood: 0.3649
+      - DDoS-SYN_Flood: 0.0002
+    ----------------------------------------
+
+[80] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:49.433556
+    Confiança: 0.6335
+    Tempo de inferência: 1.59 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6335
+      - DoS-TCP_Flood: 0.3649
+      - DDoS-SYN_Flood: 0.0002
+    ----------------------------------------
+
+[81] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:43.735102
+    Confiança: 0.6330
+    Tempo de inferência: 1.25 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6330
+      - DoS-TCP_Flood: 0.3654
+      - DDoS-SYN_Flood: 0.0003
+    ----------------------------------------
+
+[82] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:45.058603
+    Confiança: 0.6330
+    Tempo de inferência: 0.82 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6330
+      - DoS-TCP_Flood: 0.3654
+      - DDoS-SYN_Flood: 0.0003
+    ----------------------------------------
+
+[83] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:45.566699
+    Confiança: 0.6323
+    Tempo de inferência: 1.10 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6323
+      - DoS-TCP_Flood: 0.3661
+      - DDoS-SYN_Flood: 0.0003
+    ----------------------------------------
+
+[84] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:48.353303
+    Confiança: 0.6318
+    Tempo de inferência: 1.24 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.6318
+      - DoS-UDP_Flood: 0.3644
+      - DDoS-RSTFINFlood: 0.0007
+    ----------------------------------------
+
+[85] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:42.773480
+    Confiança: 0.6317
+    Tempo de inferência: 1.39 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6317
+      - DoS-TCP_Flood: 0.3667
+      - DDoS-SYN_Flood: 0.0003
+    ----------------------------------------
+
+[86] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:45.668298
+    Confiança: 0.6317
+    Tempo de inferência: 1.01 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6317
+      - DoS-TCP_Flood: 0.3667
+      - DDoS-SYN_Flood: 0.0003
+    ----------------------------------------
+
+[87] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:41.304273
+    Confiança: 0.6308
+    Tempo de inferência: 1.18 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.6308
+      - DoS-SYN_Flood: 0.1919
+      - DDoS-SynonymousIP_Flood: 0.1749
+    ----------------------------------------
+
+[88] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:43.092546
+    Confiança: 0.6186
+    Tempo de inferência: 1.48 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6186
+      - DoS-TCP_Flood: 0.3795
+      - DDoS-SYN_Flood: 0.0004
+    ----------------------------------------
+
+[89] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:46.381728
+    Confiança: 0.6173
+    Tempo de inferência: 1.09 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.6173
+      - DoS-UDP_Flood: 0.3793
+      - Mirai-greip_flood: 0.0007
+    ----------------------------------------
+
+[90] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:48.665890
+    Confiança: 0.6118
+    Tempo de inferência: 0.96 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.6118
+      - DoS-TCP_Flood: 0.3861
+      - DDoS-SYN_Flood: 0.0005
+    ----------------------------------------
+
+[91] ATAQUE: DDoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:44.752734
+    Confiança: 0.5970
+    Tempo de inferência: 1.04 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-TCP_Flood: 0.5970
+      - DoS-TCP_Flood: 0.4008
+      - DDoS-SYN_Flood: 0.0005
+    ----------------------------------------
+
+[92] TRÁFEGO NORMAL: BenignTraffic
+    Timestamp: 2025-06-12T15:14:49.637323
+    Confiança: 0.5751
+    Tempo de inferência: 1.11 ms
+    Predição correta: ✗ NÃO
+    Top 3 classes mais prováveis:
+      - BenignTraffic: 0.5751
+      - MITM-ArpSpoofing: 0.3134
+      - DNS_Spoofing: 0.0374
+    ----------------------------------------
+
+[93] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:40.034087
+    Confiança: 0.5613
+    Tempo de inferência: 1.56 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.5613
+      - DDoS-SynonymousIP_Flood: 0.2628
+      - DoS-SYN_Flood: 0.1739
+    ----------------------------------------
+
+[94] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:41.408493
+    Confiança: 0.5613
+    Tempo de inferência: 1.05 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.5613
+      - DDoS-SynonymousIP_Flood: 0.2628
+      - DoS-SYN_Flood: 0.1739
+    ----------------------------------------
+
+[95] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:42.553217
+    Confiança: 0.5613
+    Tempo de inferência: 0.99 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.5613
+      - DDoS-SynonymousIP_Flood: 0.2628
+      - DoS-SYN_Flood: 0.1739
+    ----------------------------------------
+
+[96] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:44.449271
+    Confiança: 0.5613
+    Tempo de inferência: 0.90 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.5613
+      - DDoS-SynonymousIP_Flood: 0.2628
+      - DoS-SYN_Flood: 0.1739
+    ----------------------------------------
+
+[97] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:49.016616
+    Confiança: 0.5557
+    Tempo de inferência: 0.85 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.5557
+      - DDoS-SynonymousIP_Flood: 0.2692
+      - DoS-SYN_Flood: 0.1732
+    ----------------------------------------
+
+[98] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:44.956319
+    Confiança: 0.5513
+    Tempo de inferência: 0.90 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.5513
+      - DDoS-SynonymousIP_Flood: 0.2720
+      - DoS-SYN_Flood: 0.1747
+    ----------------------------------------
+
+[99] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:45.874116
+    Confiança: 0.5506
+    Tempo de inferência: 1.51 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.5506
+      - DDoS-SynonymousIP_Flood: 0.2727
+      - DoS-SYN_Flood: 0.1748
+    ----------------------------------------
+
+[100] TRÁFEGO NORMAL: BenignTraffic
+    Timestamp: 2025-06-12T15:14:48.464080
+    Confiança: 0.5451
+    Tempo de inferência: 1.50 ms
+    Predição correta: ✗ NÃO
+    Top 3 classes mais prováveis:
+      - BenignTraffic: 0.5451
+      - MITM-ArpSpoofing: 0.1038
+      - DNS_Spoofing: 0.0999
+    ----------------------------------------
+
+[101] ATAQUE: DDoS-SYN_Flood
+    Timestamp: 2025-06-12T15:14:41.918521
+    Confiança: 0.5437
+    Tempo de inferência: 0.78 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-SYN_Flood: 0.5437
+      - DDoS-SynonymousIP_Flood: 0.2781
+      - DoS-SYN_Flood: 0.1763
+    ----------------------------------------
+
+[102] ATAQUE: DoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:47.845380
+    Confiança: 0.5423
+    Tempo de inferência: 8.85 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DoS-TCP_Flood: 0.5423
+      - DDoS-TCP_Flood: 0.4550
+      - DDoS-SYN_Flood: 0.0005
+    ----------------------------------------
+
+[103] ATAQUE: Mirai-greeth_flood
+    Timestamp: 2025-06-12T15:14:38.900990
+    Confiança: 0.5412
+    Tempo de inferência: 13.16 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - Mirai-greeth_flood: 0.5412
+      - Mirai-greip_flood: 0.4490
+      - DDoS-UDP_Fragmentation: 0.0027
+    ----------------------------------------
+
+[104] ATAQUE: DoS-TCP_Flood
+    Timestamp: 2025-06-12T15:14:47.220673
+    Confiança: 0.5396
+    Tempo de inferência: 1.54 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DoS-TCP_Flood: 0.5396
+      - DDoS-TCP_Flood: 0.4577
+      - DDoS-SYN_Flood: 0.0005
+    ----------------------------------------
+
+[105] ATAQUE: Mirai-greeth_flood
+    Timestamp: 2025-06-12T15:14:40.373643
+    Confiança: 0.5390
+    Tempo de inferência: 1.01 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - Mirai-greeth_flood: 0.5390
+      - Mirai-greip_flood: 0.4511
+      - DDoS-UDP_Fragmentation: 0.0027
+    ----------------------------------------
+
+[106] ATAQUE: Mirai-greeth_flood
+    Timestamp: 2025-06-12T15:14:41.513111
+    Confiança: 0.5390
+    Tempo de inferência: 2.10 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - Mirai-greeth_flood: 0.5390
+      - Mirai-greip_flood: 0.4511
+      - DDoS-UDP_Fragmentation: 0.0027
+    ----------------------------------------
+
+[107] ATAQUE: Mirai-greeth_flood
+    Timestamp: 2025-06-12T15:14:40.272621
+    Confiança: 0.5356
+    Tempo de inferência: 2.04 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - Mirai-greeth_flood: 0.5356
+      - Mirai-greip_flood: 0.4546
+      - DDoS-UDP_Fragmentation: 0.0028
+    ----------------------------------------
+
+[108] ATAQUE: Mirai-greeth_flood
+    Timestamp: 2025-06-12T15:14:40.138987
+    Confiança: 0.5327
+    Tempo de inferência: 1.73 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - Mirai-greeth_flood: 0.5327
+      - Mirai-greip_flood: 0.4574
+      - DDoS-UDP_Fragmentation: 0.0028
+    ----------------------------------------
+
+[109] TRÁFEGO NORMAL: BenignTraffic
+    Timestamp: 2025-06-12T15:14:50.263690
+    Confiança: 0.5236
+    Tempo de inferência: 1.03 ms
+    Predição correta: ✗ NÃO
+    Top 3 classes mais prováveis:
+      - BenignTraffic: 0.5236
+      - DNS_Spoofing: 0.1079
+      - MITM-ArpSpoofing: 0.0992
+    ----------------------------------------
+
+[110] TRÁFEGO NORMAL: BenignTraffic
+    Timestamp: 2025-06-12T15:14:45.261977
+    Confiança: 0.5100
+    Tempo de inferência: 0.97 ms
+    Predição correta: ✗ NÃO
+    Top 3 classes mais prováveis:
+      - BenignTraffic: 0.5100
+      - DNS_Spoofing: 0.1555
+      - MITM-ArpSpoofing: 0.1500
+    ----------------------------------------
+
+[111] ATAQUE: DDoS-UDP_Flood
+    Timestamp: 2025-06-12T15:14:41.201100
+    Confiança: 0.5005
+    Tempo de inferência: 1.13 ms
+    Predição correta: ✓ SIM
+    Top 3 classes mais prováveis:
+      - DDoS-UDP_Flood: 0.5005
+      - DoS-UDP_Flood: 0.4953
+      - Mirai-greip_flood: 0.0010
+    ----------------------------------------
+
+=== RESUMO DE ATAQUES ===
+Total de ataques: 104
+Confiança média de ataques: 0.7835
+Confiança mínima de ataques: 0.5005
+Confiança máxima de ataques: 0.9995
+
+=== RESUMO DE TRÁFEGO NORMAL ===
+Total de tráfego normal: 7
+Confiança média de tráfego normal: 0.6034
+Confiança mínima de tráfego normal: 0.5100
+Confiança máxima de tráfego normal: 0.7540
+
+=== TOP 10 DETECÇÕES POR CONFIANÇA ===
+1. [ATAQUE] DDoS-ICMP_Flood (Confiança: 0.9995)
+2. [ATAQUE] DDoS-ICMP_Flood (Confiança: 0.9995)
+3. [ATAQUE] DDoS-ICMP_Flood (Confiança: 0.9995)
+4. [ATAQUE] DDoS-ICMP_Flood (Confiança: 0.9995)
+5. [ATAQUE] DDoS-ICMP_Flood (Confiança: 0.9995)
+6. [ATAQUE] DDoS-ICMP_Flood (Confiança: 0.9995)
+7. [ATAQUE] DDoS-ICMP_Flood (Confiança: 0.9995)
+8. [ATAQUE] DDoS-ICMP_Flood (Confiança: 0.9995)
+9. [ATAQUE] DDoS-ICMP_Flood (Confiança: 0.9995)
+10. [ATAQUE] DDoS-ICMP_Flood (Confiança: 0.9995)
+
+=== 10 INFERÊNCIAS MAIS RÁPIDAS ===
+1. [ATAQUE] 0.75 ms - Mirai-udpplain
+2. [NORMAL] 0.77 ms - BenignTraffic
+3. [ATAQUE] 0.78 ms - DDoS-SYN_Flood
+4. [ATAQUE] 0.81 ms - DDoS-SYN_Flood
+5. [ATAQUE] 0.82 ms - DDoS-TCP_Flood
+6. [ATAQUE] 0.83 ms - DDoS-PSHACK_Flood
+7. [ATAQUE] 0.85 ms - DDoS-ICMP_Flood
+8. [ATAQUE] 0.85 ms - DDoS-ICMP_Flood
+9. [ATAQUE] 0.85 ms - DDoS-SYN_Flood
+10. [ATAQUE] 0.85 ms - DDoS-TCP_Flood
+
+=== 10 INFERÊNCIAS MAIS LENTAS ===
+1. [ATAQUE] 16.21 ms - DDoS-RSTFINFlood
+2. [NORMAL] 14.83 ms - BenignTraffic
+3. [ATAQUE] 13.16 ms - Mirai-greeth_flood
+4. [ATAQUE] 11.43 ms - DDoS-ICMP_Flood
+5. [ATAQUE] 8.85 ms - DoS-TCP_Flood
+6. [ATAQUE] 8.08 ms - DDoS-RSTFINFlood
+7. [ATAQUE] 7.75 ms - DDoS-SYN_Flood
+8. [ATAQUE] 7.63 ms - DDoS-ICMP_Flood
+9. [ATAQUE] 3.65 ms - DDoS-UDP_Flood
+10. [ATAQUE] 2.60 ms - DDoS-PSHACK_Flood
