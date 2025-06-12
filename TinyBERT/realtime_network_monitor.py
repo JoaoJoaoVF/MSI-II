@@ -47,53 +47,58 @@ class NetworkAttackDetector:
         self.label_encoder = self.metadata['label_encoder']
         self.feature_names = self.metadata['feature_names']
         self.classes = self.metadata['classes']
-        
+
+        # Mapeamento de classes numéricas para nomes
+        self.class_names = {
+            1: "Backdoor_Malware",
+            2: "BenignTraffic",
+            3: "BrowserHijacking",
+            4: "CommandInjection",
+            5: "DDoS-ACK_Fragmentation",
+            6: "DDoS-HTTP_Flood",
+            7: "DDoS-ICMP_Flood",
+            8: "DDoS-ICMP_Fragmentation",
+            9: "DDoS-PSHACK_Flood",
+            10: "DDoS-RSTFINFlood",
+            11: "DDoS-SYN_Flood",
+            12: "DDoS-SlowLoris",
+            13: "DDoS-SynonymousIP_Flood",
+            14: "DDoS-TCP_Flood",
+            15: "DDoS-UDP_Flood",
+            16: "DDoS-UDP_Fragmentation",
+            17: "DNS_Spoofing",
+            18: "DictionaryBruteForce",
+            19: "DoS-HTTP_Flood",
+            20: "DoS-SYN_Flood",
+            21: "DoS-TCP_Flood",
+            22: "DoS-UDP_Flood",
+            23: "MITM-ArpSpoofing",
+            24: "Mirai-greeth_flood",
+            25: "Mirai-greip_flood",
+            26: "Mirai-udpplain",
+            27: "Recon-HostDiscovery",
+            28: "Recon-OSScan",
+            29: "Recon-PingSweep",
+            30: "Recon-PortScan",
+            31: "SqlInjection",
+            32: "Uploading_Attack",
+            33: "VulnerabilityScan",
+            34: "XSS"
+        }
+
+        # Função auxiliar para converter índices de classe para nomes
+        def get_class_name(self, class_idx):
+            if isinstance(class_idx, (int, np.integer)):
+                return self.class_names.get(class_idx, f"Unknown-{class_idx}")
+            return class_idx  # Retorna como está se não for um número
+
         # Configurar threshold de confiança
         self.confidence_threshold = confidence_threshold
-        
-        # Configurar threshold de confiança
-        self.confidence_threshold = confidence_threshold
-        
+
         print(f"TinyBERT carregado com sucesso!")
-        
-        # Improved fix: Handle both numeric classes and string representations of numbers
-        numeric_classes = False
-        
-        # Check if classes are integers or strings that represent integers
-        if self.classes is not None and len(self.classes) > 0:
-            # Check if they're integers directly
-            if isinstance(self.classes[0], int):
-                numeric_classes = True
-            # Check if they're strings that represent integers
-            elif isinstance(self.classes[0], str) and self.classes[0].isdigit():
-                # Convert string numbers to actual integers for processing
-                self.classes = [int(c) for c in self.classes]
-                numeric_classes = True
-                
-        if numeric_classes:
-            try:
-                # Try to convert numeric indices back to class names using label_encoder
-                class_names = self.label_encoder.inverse_transform(self.classes)
-                print(f"Classes detectáveis: {class_names}")
-                
-                # Create a mapping for future reference
-                self.class_mapping = {idx: name for idx, name in zip(self.classes, class_names)}
-                print(f"Mapeamento de classes criado com sucesso.")
-            except Exception as e:
-                # If that fails, display with a note that they're numeric
-                print(f"Classes detectáveis (índices numéricos): {self.classes}")
-                print("Nota: classe 0 representa tráfego normal/benigno")
-                print(f"Erro ao converter índices para nomes: {e}")
-                
-                # Create a default mapping
-                self.class_mapping = {
-                    0: "Normal/Benign",
-                    # You can add known mappings here
-                }
-        else:
-            print(f"Classes detectáveis: {self.classes}")
-            self.class_mapping = None
-            
+        # Mostrar classes como nomes em vez de números
+        class_names_list = [self.get_class_name(cls) for cls in self.classes]
+        print(f"Classes detectáveis: {class_names_list}")
         print(f"Threshold de confiança: {self.confidence_threshold}")
         
         # Inicializar métricas
@@ -145,18 +150,18 @@ class NetworkAttackDetector:
         self.memory_usage.append(max(memory_info_before, memory_info_after))
         
         predicted_class_idx = np.argmax(probabilities[0])
-        predicted_class = self.classes[predicted_class_idx]
+        predicted_class_numeric = self.classes[predicted_class_idx]
+        # Converter o índice de classe para nome de classe
+        predicted_class = self.get_class_name(predicted_class_numeric)
         confidence = probabilities[0][predicted_class_idx]
-        
-        self.total_predictions += 1
-        self.inference_times.append(inference_time)
 
         # Fix: Handle both string and integer class representations
+        # Fix: Handle both numeric and string class representations
         is_benign = False
-        if isinstance(predicted_class, str):
+        if isinstance(predicted_class_numeric, (int, np.integer)):
+            is_benign = (predicted_class_numeric == 2)  # Assuming 2 is BenignTraffic
+        else:
             is_benign = predicted_class.lower() in ['benigntraffic', 'benign', 'normal']
-        elif predicted_class == 0:  # Assume class 0 is benign if numeric
-            is_benign = True
             
         is_attack = not is_benign
         
@@ -174,21 +179,15 @@ class NetworkAttackDetector:
         else:
             self.low_confidence_predictions += 1
         
-        # Convert numeric class to name if we have a mapping
-        if hasattr(self, 'class_mapping') and self.class_mapping is not None and predicted_class in self.class_mapping:
-            predicted_class_name = self.class_mapping[predicted_class]
-            # Use the name in the result, but keep the numeric index for consistent tracking
-            result_class = predicted_class_name
-        else:
-            result_class = predicted_class
-        
         return {
             'timestamp': datetime.now().isoformat(),
             'model': 'TinyBERT',
-            'predicted_class': result_class,
-            'predicted_class_idx': predicted_class,  # Store original index for reference
+            'predicted_class': predicted_class,
             'confidence': float(confidence),
-            # ...rest of the code
+            'is_attack': is_attack,
+            'is_benign': is_benign,
+            'inference_time_ms': inference_time,
+            'all_probabilities': probabilities[0].tolist()
         }
     
     def get_statistics(self):
