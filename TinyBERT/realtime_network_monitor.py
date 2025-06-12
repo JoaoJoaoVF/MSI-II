@@ -51,6 +51,9 @@ class NetworkAttackDetector:
         # Configurar threshold de confiança
         self.confidence_threshold = confidence_threshold
         
+        # Configurar threshold de confiança
+        self.confidence_threshold = confidence_threshold
+        
         print(f"TinyBERT carregado com sucesso!")
         
         # Improved fix: Handle both numeric classes and string representations of numbers
@@ -171,15 +174,21 @@ class NetworkAttackDetector:
         else:
             self.low_confidence_predictions += 1
         
+        # Convert numeric class to name if we have a mapping
+        if hasattr(self, 'class_mapping') and self.class_mapping is not None and predicted_class in self.class_mapping:
+            predicted_class_name = self.class_mapping[predicted_class]
+            # Use the name in the result, but keep the numeric index for consistent tracking
+            result_class = predicted_class_name
+        else:
+            result_class = predicted_class
+        
         return {
             'timestamp': datetime.now().isoformat(),
             'model': 'TinyBERT',
-            'predicted_class': predicted_class,
+            'predicted_class': result_class,
+            'predicted_class_idx': predicted_class,  # Store original index for reference
             'confidence': float(confidence),
-            'is_attack': is_attack,
-            'is_benign': is_benign,
-            'inference_time_ms': inference_time,
-            'all_probabilities': probabilities[0].tolist()
+            # ...rest of the code
         }
     
     def get_statistics(self):
