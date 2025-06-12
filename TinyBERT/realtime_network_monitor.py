@@ -52,7 +52,20 @@ class NetworkAttackDetector:
         self.confidence_threshold = confidence_threshold
         
         print(f"TinyBERT carregado com sucesso!")
-        print(f"Classes detectáveis: {self.classes}")
+        
+        # Fix: Convert numeric classes to readable names if needed
+        if self.classes is not None and len(self.classes) > 0 and isinstance(self.classes[0], int):
+            try:
+                # Try to convert numeric indices back to class names using label_encoder
+                class_names = self.label_encoder.inverse_transform(self.classes)
+                print(f"Classes detectáveis: {class_names}")
+            except:
+                # If that fails, display with a note that they're numeric
+                print(f"Classes detectáveis (índices numéricos): {self.classes}")
+                print("Nota: classe 0 representa tráfego normal/benigno")
+        else:
+            print(f"Classes detectáveis: {self.classes}")
+            
         print(f"Threshold de confiança: {self.confidence_threshold}")
         
         # Inicializar métricas
