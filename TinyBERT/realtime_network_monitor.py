@@ -22,7 +22,7 @@ warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 class NetworkAttackDetector:
     def __init__(self, model_path, metadata_path, confidence_threshold=0.8):
         
-        print("Carregando modelo TinyBERT...")
+        print("Carregando modelo MiniLM...")
         # Configurar ONNX Runtime para eficiência balanceada
         providers = ['CPUExecutionProvider']
         sess_options = ort.SessionOptions()
@@ -51,7 +51,7 @@ class NetworkAttackDetector:
         # Configurar threshold de confiança
         self.confidence_threshold = confidence_threshold
         
-        print(f"TinyBERT carregado com sucesso!")
+        print(f"MiniLM carregado com sucesso!")
         print(f"Classes detectáveis: {self.classes}")
         print(f"Threshold de confiança: {self.confidence_threshold}")
         
@@ -130,7 +130,7 @@ class NetworkAttackDetector:
         
         return {
             'timestamp': datetime.now().isoformat(),
-            'model': 'TinyBERT',
+            'model': 'MiniLM',
             'predicted_class': predicted_class,
             'confidence': float(confidence),
             'is_attack': is_attack,
@@ -144,7 +144,7 @@ class NetworkAttackDetector:
             return {}
         
         return {
-            'model': 'TinyBERT',
+            'model': 'MiniLM',
             'total_predictions': self.total_predictions,
             'attack_detections': self.attack_detections,
             'benign_detections': self.benign_count,
@@ -193,9 +193,9 @@ class RealTimeMonitor:
     def save_all_results(self):
         if self.result_file and self.results:
             with open(self.result_file, 'w', encoding='utf-8') as f:
-                f.write("=== RESULTADOS DA ANÁLISE TinyBERT ===\n")
+                f.write("=== RESULTADOS DA ANÁLISE MiniLM ===\n")
                 f.write(f"Data/Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write(f"Modelo: TinyBERT (Otimizado para Workstations)\n")
+                f.write(f"Modelo: MiniLM (Otimizado para Workstations)\n")
                 f.write(f"Total de amostras processadas: {len(self.results)}\n")
                 f.write(f"Threshold de confiança: {self.detector.confidence_threshold}\n\n")
                 
@@ -416,7 +416,7 @@ class RealTimeMonitor:
         monitor_thread.daemon = True
         monitor_thread.start()
         
-        print("Monitoramento TinyBERT iniciado...")
+        print("Monitoramento MiniLM iniciado...")
         return monitor_thread
     
     def stop_monitoring(self):
@@ -430,7 +430,7 @@ def simulate_network_data(csv_file, detector, monitor, delay=0.1):  # Delay bala
     monitor.save_result(message)
     df = pd.read_csv(csv_file)
     
-    message = f"Iniciando simulação TinyBERT com {len(df)} amostras..."
+    message = f"Iniciando simulação MiniLM com {len(df)} amostras..."
     monitor.save_result(message)
     
     has_labels = 'label' in df.columns
@@ -460,9 +460,9 @@ def simulate_network_data(csv_file, detector, monitor, delay=0.1):  # Delay bala
         time.sleep(delay)
 
 def main():
-    parser = argparse.ArgumentParser(description='Detector de Ataques de Rede TinyBERT - Otimizado para Workstations')
-    parser.add_argument('--model', default='tinybert_attack_detector_quantized.onnx', help='Modelo ONNX TinyBERT')
-    parser.add_argument('--metadata', default='tinybert_metadata.pkl', help='Metadados do modelo TinyBERT')
+    parser = argparse.ArgumentParser(description='Detector de Ataques de Rede MiniLM - Otimizado para Workstations')
+    parser.add_argument('--model', default='minilm_attack_detector_quantized.onnx', help='Modelo ONNX MiniLM')
+    parser.add_argument('--metadata', default='minilm_metadata.pkl', help='Metadados do modelo MiniLM')
     parser.add_argument('--simulate', type=str, help='Arquivo CSV para simulação')
     parser.add_argument('--delay', type=float, default=0.1, help='Delay entre amostras (segundos)')
     parser.add_argument('--interactive', action='store_true', help='Modo interativo')
@@ -474,8 +474,8 @@ def main():
     result_file = None
     if args.simulate:
         csv_basename = os.path.splitext(os.path.basename(args.simulate))[0]
-        result_file = f"result-tinybert-part-{csv_basename}.txt"
-        print(f"Resultados TinyBERT serão salvos em: {result_file}")
+        result_file = f"result-minilm-part-{csv_basename}.txt"
+        print(f"Resultados MiniLM serão salvos em: {result_file}")
     elif args.output:
         result_file = args.output
         print(f"Resultados serão salvos em: {result_file}")
@@ -484,11 +484,11 @@ def main():
         detector = NetworkAttackDetector(args.model, args.metadata)
         monitor = RealTimeMonitor(detector, result_file=result_file)
     except Exception as e:
-        print(f"Erro ao inicializar detector TinyBERT: {e}")
+        print(f"Erro ao inicializar detector MiniLM: {e}")
         sys.exit(1)
     
     if args.benchmark:
-        print("Executando benchmark TinyBERT para workstation...")
+        print("Executando benchmark MiniLM para workstation...")
         
         test_features = {name: np.random.randn() for name in detector.feature_names}
         
@@ -496,7 +496,7 @@ def main():
             detector.predict(test_features)
         
         stats = detector.get_statistics()
-        print(f"\nResultados do benchmark TinyBERT:")
+        print(f"\nResultados do benchmark MiniLM:")
         print(f"Predições: {stats['total_predictions']}")
         print(f"Tempo médio: {stats['avg_inference_time_ms']:.2f} ms")
         print(f"Throughput: {stats['throughput_per_second']:.2f} predições/segundo")
@@ -519,10 +519,10 @@ def main():
             monitor.save_all_results()
             
             if result_file:
-                print(f"\n✅ Análise TinyBERT concluída! Resultados salvos em: {result_file}")
+                print(f"\n✅ Análise MiniLM concluída! Resultados salvos em: {result_file}")
     
     elif args.interactive:
-        print("\nModo interativo TinyBERT ativado.")
+        print("\nModo interativo MiniLM ativado.")
         print("Digite valores para as features ou 'sair' para encerrar.")
         print(f"Features necessárias: {detector.feature_names[:5]}... (total: {len(detector.feature_names)})")
         
@@ -533,7 +533,7 @@ def main():
                 test_features = {name: np.random.randn() for name in detector.feature_names}
                 result = detector.predict(test_features)
                 
-                print(f"\nResultado TinyBERT:")
+                print(f"\nResultado MiniLM:")
                 print(f"  Classe: {result['predicted_class']}")
                 print(f"  Confiança: {result['confidence']:.3f}")
                 print(f"  É ataque: {result['is_attack']}")
