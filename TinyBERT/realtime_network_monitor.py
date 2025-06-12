@@ -86,11 +86,33 @@ class NetworkAttackDetector:
             34: "XSS"
         }
 
-        # Função auxiliar para converter índices de classe para nomes
-        def get_class_name(self, class_idx):
-            if isinstance(class_idx, (int, np.integer)):
-                return self.class_names.get(class_idx, f"Unknown-{class_idx}")
-            return class_idx  # Retorna como está se não for um número
+        # Configurar threshold de confiança
+        self.confidence_threshold = confidence_threshold
+
+        print(f"TinyBERT carregado com sucesso!")
+        # Mostrar classes como nomes em vez de números
+        class_names_list = [self.get_class_name(cls) for cls in self.classes]
+        print(f"Classes detectáveis: {class_names_list}")
+        print(f"Threshold de confiança: {self.confidence_threshold}")
+        
+        # Inicializar métricas
+        self.total_predictions = 0
+        self.attack_detections = 0
+        self.attack_types = {}  # Para contagem de tipos de ataque
+        self.benign_count = 0   # Contagem de tráfego normal
+        self.inference_times = []
+        self.cpu_usage = []
+        self.memory_usage = []
+        
+        # Para rastreamento de confiança
+        self.high_confidence_predictions = 0
+        self.low_confidence_predictions = 0
+    
+    # Função auxiliar para converter índices de classe para nomes
+    def get_class_name(self, class_idx):
+        if isinstance(class_idx, (int, np.integer)):
+            return self.class_names.get(class_idx, f"Unknown-{class_idx}")
+        return class_idx  # Retorna como está se não for um número
 
         # Configurar threshold de confiança
         self.confidence_threshold = confidence_threshold
