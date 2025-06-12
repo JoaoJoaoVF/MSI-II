@@ -53,18 +53,43 @@ class NetworkAttackDetector:
         
         print(f"TinyBERT carregado com sucesso!")
         
-        # Fix: Convert numeric classes to readable names if needed
-        if self.classes is not None and len(self.classes) > 0 and isinstance(self.classes[0], int):
+        # Improved fix: Handle both numeric classes and string representations of numbers
+        numeric_classes = False
+        
+        # Check if classes are integers or strings that represent integers
+        if self.classes is not None and len(self.classes) > 0:
+            # Check if they're integers directly
+            if isinstance(self.classes[0], int):
+                numeric_classes = True
+            # Check if they're strings that represent integers
+            elif isinstance(self.classes[0], str) and self.classes[0].isdigit():
+                # Convert string numbers to actual integers for processing
+                self.classes = [int(c) for c in self.classes]
+                numeric_classes = True
+                
+        if numeric_classes:
             try:
                 # Try to convert numeric indices back to class names using label_encoder
                 class_names = self.label_encoder.inverse_transform(self.classes)
                 print(f"Classes detectáveis: {class_names}")
-            except:
+                
+                # Create a mapping for future reference
+                self.class_mapping = {idx: name for idx, name in zip(self.classes, class_names)}
+                print(f"Mapeamento de classes criado com sucesso.")
+            except Exception as e:
                 # If that fails, display with a note that they're numeric
                 print(f"Classes detectáveis (índices numéricos): {self.classes}")
                 print("Nota: classe 0 representa tráfego normal/benigno")
+                print(f"Erro ao converter índices para nomes: {e}")
+                
+                # Create a default mapping
+                self.class_mapping = {
+                    0: "Normal/Benign",
+                    # You can add known mappings here
+                }
         else:
             print(f"Classes detectáveis: {self.classes}")
+            self.class_mapping = None
             
         print(f"Threshold de confiança: {self.confidence_threshold}")
         
