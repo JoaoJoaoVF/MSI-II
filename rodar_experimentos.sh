@@ -18,13 +18,13 @@ for csv in "$DATA_DIR"/*.csv; do
   echo "=== Processando $(basename "$csv") ==="
 
   echo -e "\n[MiniLM] Executando simulação..."
-  python /MiniLM/minilm_network_monitor.py --simulate "$csv"
+  python MiniLM/minilm_network_monitor.py --simulate "$csv"
   
   echo -e "\n[DistilBERT] Executando simulação..."
-  python /DistilBERT/distilbert_network_monitor.py --simulate "$csv"
+  python DistilBERT/distilbert_network_monitor.py --simulate "$csv"
 
   echo -e "\n[TinyBERT] Executando simulação..."
-  python /TinyBERT/realtime_network_monitor.py --simulate "$csv"
+  python TinyBERT/realtime_network_monitor.py --simulate "$csv"
 
   echo -e "\n----------------------------------------\n"
 done
