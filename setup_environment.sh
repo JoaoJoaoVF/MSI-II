@@ -230,7 +230,7 @@ install_python_deps() {
                 log_error "Falha crítica ao instalar $package_name"
             fi
         fi
-    done < "requirements_consolidated.txt"
+    done < "requirements.txt"
     
     # Verificar pacotes críticos
     critical_packages=("onnxruntime" "numpy" "pandas" "scikit-learn" "torch" "transformers")
@@ -261,7 +261,7 @@ install_python_deps() {
 create_consolidated_requirements() {
     log_info "Criando arquivo de requirements consolidado..."
     
-    cat > requirements_consolidated.txt << 'EOF'
+    cat > requirements.txt << 'EOF'
 # Dependências consolidadas para todos os modelos
 onnxruntime>=1.17.0
 numpy>=1.24.0
@@ -611,7 +611,7 @@ show_file_info() {
     echo "• Logs: logs/*/attack_log.json"
     echo "• Configurações: config/*_config.json"
     echo "• Análises: analysis_results/*/"
-    echo "• Requirements: requirements_consolidated.txt"
+    echo "• Requirements: requirements.txt"
     echo ""
 }
 
