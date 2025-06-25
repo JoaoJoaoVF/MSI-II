@@ -22,23 +22,9 @@ warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 class NetworkAttackDetector:
     def __init__(self, model_path, metadata_path, confidence_threshold=0.8):
         
-        print("Carregando modelo MiniLM...")
-        # Configurar ONNX Runtime para eficiência balanceada
-        providers = ['CPUExecutionProvider']
-        sess_options = ort.SessionOptions()
-        sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-        sess_options.intra_op_num_threads = psutil.cpu_count()  # Usar todos os cores disponíveis
-        sess_options.inter_op_num_threads = 2  # Balanceado para workstations
-        sess_options.execution_mode = ort.ExecutionMode.ORT_PARALLEL
-        sess_options.enable_mem_pattern = True
-        sess_options.enable_cpu_mem_arena = True
+        print("Carregando modelo...")
+        self.session = ort.InferenceSession(model_path)
         
-        self.session = ort.InferenceSession(
-            model_path, 
-            sess_options=sess_options,
-            providers=providers
-        )
-
         print("Carregando metadados...")
         with open(metadata_path, 'rb') as f:
             self.metadata = pickle.load(f)
@@ -48,10 +34,48 @@ class NetworkAttackDetector:
         self.feature_names = self.metadata['feature_names']
         self.classes = self.metadata['classes']
         
+        # Mapeamento de classes numéricas para nomes
+        self.class_names = {
+            1: "Backdoor_Malware",
+            2: "BenignTraffic",
+            3: "BrowserHijacking",
+            4: "CommandInjection",
+            5: "DDoS-ACK_Fragmentation",
+            6: "DDoS-HTTP_Flood",
+            7: "DDoS-ICMP_Flood",
+            8: "DDoS-ICMP_Fragmentation",
+            9: "DDoS-PSHACK_Flood",
+            10: "DDoS-RSTFINFlood",
+            11: "DDoS-SYN_Flood",
+            12: "DDoS-SlowLoris",
+            13: "DDoS-SynonymousIP_Flood",
+            14: "DDoS-TCP_Flood",
+            15: "DDoS-UDP_Flood",
+            16: "DDoS-UDP_Fragmentation",
+            17: "DNS_Spoofing",
+            18: "DictionaryBruteForce",
+            19: "DoS-HTTP_Flood",
+            20: "DoS-SYN_Flood",
+            21: "DoS-TCP_Flood",
+            22: "DoS-UDP_Flood",
+            23: "MITM-ArpSpoofing",
+            24: "Mirai-greeth_flood",
+            25: "Mirai-greip_flood",
+            26: "Mirai-udpplain",
+            27: "Recon-HostDiscovery",
+            28: "Recon-OSScan",
+            29: "Recon-PingSweep",
+            30: "Recon-PortScan",
+            31: "SqlInjection",
+            32: "Uploading_Attack",
+            33: "VulnerabilityScan",
+            34: "XSS"
+        }
+        
         # Configurar threshold de confiança
         self.confidence_threshold = confidence_threshold
         
-        print(f"MiniLM carregado com sucesso!")
+        print(f"Modelo carregado com sucesso!")
         print(f"Classes detectáveis: {self.classes}")
         print(f"Threshold de confiança: {self.confidence_threshold}")
         
@@ -67,8 +91,72 @@ class NetworkAttackDetector:
         # Para rastreamento de confiança
         self.high_confidence_predictions = 0
         self.low_confidence_predictions = 0
+        
+        # Métricas por tipo de ataque
+        self.true_positives = {}
+        self.false_positives = {}
+        self.false_negatives = {}
+        self.true_negatives = {}
+        
+        # Inicializar contadores para cada tipo de ataque
+        for class_name in self.class_names.values():
+            self.true_positives[class_name] = 0
+            self.false_positives[class_name] = 0
+            self.false_negatives[class_name] = 0
+            self.true_negatives[class_name] = 0
+    
+    def get_class_name(self, class_idx):
+        """Converter índice de classe para nome"""
+        if isinstance(class_idx, (int, np.integer)):
+            return self.class_names.get(class_idx, f"Unknown-{class_idx}")
+        return class_idx
+
+    def update_metrics(self, predicted_class, true_class):
+        """Atualiza as métricas de classificação para cada tipo de ataque"""
+        predicted_name = self.get_class_name(predicted_class)
+        true_name = self.get_class_name(true_class)
+        
+        for class_name in self.class_names.values():
+            if class_name == predicted_name and class_name == true_name:
+                self.true_positives[class_name] += 1
+            elif class_name == predicted_name and class_name != true_name:
+                self.false_positives[class_name] += 1
+            elif class_name != predicted_name and class_name == true_name:
+                self.false_negatives[class_name] += 1
+            else:
+                self.true_negatives[class_name] += 1
+
+    def get_metrics_by_class(self):
+        """Calcula métricas para cada tipo de ataque"""
+        metrics = {}
+        
+        for class_name in self.class_names.values():
+            tp = self.true_positives[class_name]
+            fp = self.false_positives[class_name]
+            fn = self.false_negatives[class_name]
+            tn = self.true_negatives[class_name]
+            
+            # Evitar divisão por zero
+            precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+            recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+            f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+            accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
+            
+            metrics[class_name] = {
+                'precision': precision,
+                'recall': recall,
+                'f1_score': f1,
+                'accuracy': accuracy,
+                'true_positives': tp,
+                'false_positives': fp,
+                'false_negatives': fn,
+                'true_negatives': tn
+            }
+        
+        return metrics
     
     def preprocess_features(self, features_dict):
+        # [manter código existente]
         feature_values = {}
         for feature_name in self.feature_names:
             feature_values[feature_name] = features_dict.get(feature_name, 0.0)
@@ -130,7 +218,6 @@ class NetworkAttackDetector:
         
         return {
             'timestamp': datetime.now().isoformat(),
-            'model': 'MiniLM',
             'predicted_class': predicted_class,
             'confidence': float(confidence),
             'is_attack': is_attack,
@@ -143,8 +230,16 @@ class NetworkAttackDetector:
         if not self.inference_times:
             return {}
         
+        # Calcular métricas por classe
+        metrics_by_class = self.get_metrics_by_class()
+        
+        # Calcular médias das métricas
+        avg_precision = np.mean([m['precision'] for m in metrics_by_class.values()])
+        avg_recall = np.mean([m['recall'] for m in metrics_by_class.values()])
+        avg_f1 = np.mean([m['f1_score'] for m in metrics_by_class.values()])
+        avg_accuracy = np.mean([m['accuracy'] for m in metrics_by_class.values()])
+        
         return {
-            'model': 'MiniLM',
             'total_predictions': self.total_predictions,
             'attack_detections': self.attack_detections,
             'benign_detections': self.benign_count,
@@ -161,7 +256,18 @@ class NetworkAttackDetector:
             'max_cpu_usage': np.max(self.cpu_usage) if self.cpu_usage else 0,
             'avg_memory_usage': np.mean(self.memory_usage) if self.memory_usage else 0,
             'max_memory_usage': np.max(self.memory_usage) if self.memory_usage else 0,
-            'confidence_threshold': self.confidence_threshold
+            'confidence_threshold': self.confidence_threshold,
+            
+            # Métricas médias
+            'average_metrics': {
+                'precision': float(avg_precision),
+                'recall': float(avg_recall),
+                'f1_score': float(avg_f1),
+                'accuracy': float(avg_accuracy)
+            },
+            
+            # Métricas detalhadas por tipo de ataque
+            'metrics_by_attack_type': metrics_by_class
         }
 
 class RealTimeMonitor:
@@ -192,10 +298,14 @@ class RealTimeMonitor:
     
     def save_all_results(self):
         if self.result_file and self.results:
+            # Obter estatísticas do detector
+            stats = self.detector.get_statistics()
+            metrics_by_class = stats.get('metrics_by_attack_type', {})
+            avg_metrics = stats.get('average_metrics', {})
+            
             with open(self.result_file, 'w', encoding='utf-8') as f:
-                f.write("=== RESULTADOS DA ANÁLISE MiniLM ===\n")
+                f.write("=== RESULTADOS DA ANÁLISE ===\n")
                 f.write(f"Data/Hora: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write(f"Modelo: MiniLM (Otimizado para Workstations)\n")
                 f.write(f"Total de amostras processadas: {len(self.results)}\n")
                 f.write(f"Threshold de confiança: {self.detector.confidence_threshold}\n\n")
                 
@@ -215,166 +325,38 @@ class RealTimeMonitor:
                 f.write("=== ESTATÍSTICAS DE CONFIANÇA ===\n")
                 f.write(f"Predições com alta confiança: {len(high_confidence)} ({len(high_confidence)/len(self.results)*100:.2f}%)\n")
                 f.write(f"Predições com baixa confiança: {len(low_confidence)} ({len(low_confidence)/len(self.results)*100:.2f}%)\n")
-                f.write(f"Confiança média: {np.mean(confidences):.4f}\n")
-                f.write(f"Confiança mediana: {np.median(confidences):.4f}\n")
-                f.write(f"Confiança mínima: {np.min(confidences):.4f}\n")
-                f.write(f"Confiança máxima: {np.max(confidences):.4f}\n")
-                f.write(f"Desvio padrão da confiança: {np.std(confidences):.4f}\n\n")
+                f.write(f"Confiança média: {np.mean(confidences):.3f}\n")
+                f.write(f"Confiança mínima: {min(confidences):.3f}\n")
+                f.write(f"Confiança máxima: {max(confidences):.3f}\n\n")
                 
-                # Lista de todos os ataques e suas incidências
-                attack_types = {}
-                for result in self.results:
-                    if result['is_attack']:
-                        attack_type = result['predicted_class']
-                        attack_types[attack_type] = attack_types.get(attack_type, 0) + 1
-                    
-                f.write("=== INCIDÊNCIA DE ATAQUES ===\n")
-                if attack_types:
-                    for attack_type, count in sorted(attack_types.items(), key=lambda x: x[1], reverse=True):
-                        f.write(f"{attack_type}: {count} ocorrências ({count/len(self.results)*100:.2f}%)\n")
-                else:
-                    f.write("Nenhum ataque detectado\n")
-                f.write(f"Tráfego Normal: {len(benign)} ocorrências ({len(benign)/len(self.results)*100:.2f}%)\n\n")
+                # Métricas médias
+                f.write("=== MÉTRICAS MÉDIAS DE AVALIAÇÃO ===\n")
+                f.write(f"Precisão média: {avg_metrics.get('precision', 0):.4f}\n")
+                f.write(f"Recall médio: {avg_metrics.get('recall', 0):.4f}\n")
+                f.write(f"F1-Score médio: {avg_metrics.get('f1_score', 0):.4f}\n")
+                f.write(f"Acurácia média: {avg_metrics.get('accuracy', 0):.4f}\n\n")
                 
-                # Métricas de performance
-                inference_times = [r['inference_time_ms'] for r in self.results]
+                # Métricas por tipo de ataque
+                f.write("=== MÉTRICAS POR TIPO DE ATAQUE ===\n")
+                for attack_type, metrics in metrics_by_class.items():
+                    f.write(f"\n{attack_type}:\n")
+                    f.write(f"  Precisão: {metrics['precision']:.4f}\n")
+                    f.write(f"  Recall: {metrics['recall']:.4f}\n")
+                    f.write(f"  F1-Score: {metrics['f1_score']:.4f}\n")
+                    f.write(f"  Acurácia: {metrics['accuracy']:.4f}\n")
+                    f.write(f"  Verdadeiros Positivos: {metrics['true_positives']}\n")
+                    f.write(f"  Falsos Positivos: {metrics['false_positives']}\n")
+                    f.write(f"  Falsos Negativos: {metrics['false_negatives']}\n")
+                    f.write(f"  Verdadeiros Negativos: {metrics['true_negatives']}\n")
                 
-                f.write("=== MÉTRICAS DE DESEMPENHO ===\n")
-                f.write(f"Tempo médio de inferência: {np.mean(inference_times):.2f} ms\n")
-                f.write(f"Tempo máximo de inferência: {np.max(inference_times):.2f} ms\n")
-                f.write(f"Tempo mínimo de inferência: {np.min(inference_times):.2f} ms\n")
-                f.write(f"Desvio padrão da inferência: {np.std(inference_times):.2f} ms\n")
-                f.write(f"Percentil 95 (P95) da inferência: {np.percentile(inference_times, 95):.2f} ms\n")
-                f.write(f"Percentil 99 (P99) da inferência: {np.percentile(inference_times, 99):.2f} ms\n")
-                f.write(f"Throughput: {1000 / np.mean(inference_times):.2f} predições/segundo\n")
+                # Estatísticas de performance
+                f.write("\n=== ESTATÍSTICAS DE PERFORMANCE ===\n")
+                f.write(f"Tempo médio de inferência: {stats['avg_inference_time_ms']:.2f} ms\n")
+                f.write(f"Throughput: {stats['throughput_per_second']:.2f} inferências/segundo\n")
+                f.write(f"Uso médio de CPU: {stats['avg_cpu_usage']:.1f}%\n")
+                f.write(f"Uso médio de memória: {stats['avg_memory_usage']:.1f}%\n")
                 
-                # Adicionar métricas de CPU e memória
-                stats = self.detector.get_statistics()
-                f.write(f"Uso médio de CPU: {stats.get('avg_cpu_usage', 0):.2f}%\n")
-                f.write(f"Uso máximo de CPU: {stats.get('max_cpu_usage', 0):.2f}%\n")
-                f.write(f"Uso médio de memória: {stats.get('avg_memory_usage', 0):.2f}%\n")
-                f.write(f"Uso máximo de memória: {stats.get('max_memory_usage', 0):.2f}%\n\n")
-                
-                # Adicionar métricas de acurácia se tivermos rótulos reais
-                if self.true_labels and len(self.true_labels) == len(self.results):
-                    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
-                    
-                    predicted_labels = []
-                    for result in self.results:
-                        predicted_labels.append(1 if result['is_attack'] else 0)
-                    
-                    f.write("=== MÉTRICAS DE ACURÁCIA ===\n")
-                    accuracy = accuracy_score(self.true_labels, predicted_labels)
-                    precision = precision_score(self.true_labels, predicted_labels, zero_division=0)
-                    recall = recall_score(self.true_labels, predicted_labels, zero_division=0)
-                    f1 = f1_score(self.true_labels, predicted_labels, zero_division=0)
-                    
-                    f.write(f"Acurácia: {accuracy:.4f}\n")
-                    f.write(f"Precisão: {precision:.4f}\n")
-                    f.write(f"Recall: {recall:.4f}\n")
-                    f.write(f"F1-Score: {f1:.4f}\n")
-                    
-                    # Matriz de confusão
-                    cm = confusion_matrix(self.true_labels, predicted_labels)
-                    f.write("\nMatriz de Confusão:\n")
-                    f.write("    | Normal | Ataque\n")
-                    f.write("----|--------|-------\n")
-                    f.write(f"Normal  | {cm[0][0]:6d} | {cm[0][1]:6d}\n")
-                    f.write(f"Ataque  | {cm[1][0]:6d} | {cm[1][1]:6d}\n\n")
-                    
-                    # Calcular acurácia por amostra
-                    correct_predictions = sum(1 for true, pred in zip(self.true_labels, predicted_labels) if true == pred)
-                    incorrect_predictions = sum(1 for true, pred in zip(self.true_labels, predicted_labels) if true != pred)
-                    
-                    f.write(f"Predições corretas: {correct_predictions} ({correct_predictions/len(self.results)*100:.2f}%)\n")
-                    f.write(f"Predições incorretas: {incorrect_predictions} ({incorrect_predictions/len(self.results)*100:.2f}%)\n\n")
-                
-                    # Detalhes de todas as detecções (ataques e tráfego normal)
-                f.write("=== DETALHES DE TODAS AS DETECÇÕES ===\n")
-                
-                # Ordenar todas as detecções por confiança
-                all_results_sorted = sorted(self.results, key=lambda x: x['confidence'], reverse=True)
-                
-                if all_results_sorted:
-                    for i, result in enumerate(all_results_sorted, 1):
-                        detection_type = "ATAQUE" if result['is_attack'] else "TRÁFEGO NORMAL"
-                        class_name = result['predicted_class']
-                        
-                        f.write(f"\n[{i}] {detection_type}: {class_name}\n")
-                        f.write(f"    Timestamp: {result['timestamp']}\n")
-                        f.write(f"    Confiança: {result['confidence']:.4f}\n")
-                        f.write(f"    Tempo de inferência: {result['inference_time_ms']:.2f} ms\n")
-                        
-                        # Se temos rótulos verdadeiros, mostrar se a predição foi correta
-                        if self.true_labels and i-1 < len(self.true_labels):
-                            true_value = self.true_labels[i-1]  # 1 = ataque, 0 = normal
-                            pred_value = 1 if result['is_attack'] else 0
-                            is_correct = (true_value == pred_value)
-                            f.write(f"    Predição correta: {'✓ SIM' if is_correct else '✗ NÃO'}\n")
-                            
-                        # Mostrar as top 3 classes com maior probabilidade
-                        top_classes = sorted(
-                            zip(self.detector.classes, result['all_probabilities']), 
-                            key=lambda x: x[1], 
-                            reverse=True
-                        )[:3]
-                        
-                        f.write("    Top 3 classes mais prováveis:\n")
-                        for cls_name, prob in top_classes:
-                            f.write(f"      - {cls_name}: {prob:.4f}\n")
-                        
-                        f.write("    " + "-"*40 + "\n")
-                        
-                        # Limitar o número de detalhes exibidos para não tornar o arquivo muito grande
-                        if i >= 1000:  # Limitar a 1000 resultados detalhados
-                            f.write(f"\n... mais {len(all_results_sorted) - 1000} detecções omitidas ...\n")
-                            break
-                else:
-                    f.write("Nenhuma detecção registrada durante a análise\n\n")
-                    
-                # Manter seções específicas para métricas gerais
-                f.write("\n=== RESUMO DE ATAQUES ===\n")
-                if attacks:
-                    f.write(f"Total de ataques: {len(attacks)}\n")
-                    attack_confidence = [r['confidence'] for r in attacks]
-                    f.write(f"Confiança média de ataques: {np.mean(attack_confidence):.4f}\n")
-                    f.write(f"Confiança mínima de ataques: {np.min(attack_confidence):.4f}\n")
-                    f.write(f"Confiança máxima de ataques: {np.max(attack_confidence):.4f}\n")
-                else:
-                    f.write("Nenhum ataque detectado\n")
-                
-                f.write("\n=== RESUMO DE TRÁFEGO NORMAL ===\n")
-                if benign:
-                    f.write(f"Total de tráfego normal: {len(benign)}\n")
-                    benign_confidence = [r['confidence'] for r in benign]
-                    f.write(f"Confiança média de tráfego normal: {np.mean(benign_confidence):.4f}\n")
-                    f.write(f"Confiança mínima de tráfego normal: {np.min(benign_confidence):.4f}\n")
-                    f.write(f"Confiança máxima de tráfego normal: {np.max(benign_confidence):.4f}\n")
-                else:
-                    f.write("Nenhum tráfego normal detectado\n")
-                    
-                # Resumo das Top 10 detecções com maior confiança
-                f.write("\n=== TOP 10 DETECÇÕES POR CONFIANÇA ===\n")
-                top_confidence = sorted(self.results, key=lambda x: x['confidence'], reverse=True)[:10]
-                
-                for i, result in enumerate(top_confidence, 1):
-                    detection_type = "ATAQUE" if result['is_attack'] else "NORMAL"
-                    f.write(f"{i}. [{detection_type}] {result['predicted_class']} (Confiança: {result['confidence']:.4f})\n")
-                
-                # Resumo das 10 detecções com inferência mais rápida/lenta
-                f.write("\n=== 10 INFERÊNCIAS MAIS RÁPIDAS ===\n")
-                fastest = sorted(self.results, key=lambda x: x['inference_time_ms'])[:10]
-                
-                for i, result in enumerate(fastest, 1):
-                    detection_type = "ATAQUE" if result['is_attack'] else "NORMAL" 
-                    f.write(f"{i}. [{detection_type}] {result['inference_time_ms']:.2f} ms - {result['predicted_class']}\n")
-                
-                f.write("\n=== 10 INFERÊNCIAS MAIS LENTAS ===\n")
-                slowest = sorted(self.results, key=lambda x: x['inference_time_ms'], reverse=True)[:10]
-                
-                for i, result in enumerate(slowest, 1):
-                    detection_type = "ATAQUE" if result['is_attack'] else "NORMAL"
-                    f.write(f"{i}. [{detection_type}] {result['inference_time_ms']:.2f} ms - {result['predicted_class']}\n")
+            print(f"\nResultados salvos em: {self.result_file}")
     
     def process_data_stream(self):
         while self.running:
@@ -416,7 +398,7 @@ class RealTimeMonitor:
         monitor_thread.daemon = True
         monitor_thread.start()
         
-        print("Monitoramento MiniLM iniciado...")
+        print("Monitoramento iniciado...")
         return monitor_thread
     
     def stop_monitoring(self):
@@ -425,13 +407,13 @@ class RealTimeMonitor:
     def add_data(self, features_dict):
         self.data_queue.put(features_dict)
 
-def simulate_network_data(csv_file, detector, monitor, delay=0.1):  # Delay balanceado
-    message = f"Carregando dados de simulação: {csv_file}"
-    monitor.save_result(message)
+def simulate_network_data(csv_file, detector, monitor, delay=1.0):
+    """Simular stream de dados de rede usando arquivo CSV"""
+    
+    print(f"📂 Carregando dados: {csv_file}")
     df = pd.read_csv(csv_file)
     
-    message = f"Iniciando simulação MiniLM com {len(df)} amostras..."
-    monitor.save_result(message)
+    print(f"🚀 Iniciando simulação com {len(df)} amostras...")
     
     has_labels = 'label' in df.columns
     
@@ -439,23 +421,42 @@ def simulate_network_data(csv_file, detector, monitor, delay=0.1):  # Delay bala
         if has_labels:
             # Determinar se o rótulo indica ataque (1) ou normal (0)
             label_value = row['label']
+            
+            # Fix: Handle both string and integer labels
             is_attack = 1
-            if isinstance(label_value, str) and label_value.lower() in ['benigntraffic', 'benign', 'normal']:
+            if isinstance(label_value, str):
+                if label_value.lower() in ['benigntraffic', 'benign', 'normal']:
+                    is_attack = 0
+            elif label_value == 0:  # Assume 0 is benign traffic if numeric
                 is_attack = 0
             
             features_dict = row.drop('label').to_dict()
+            result = detector.predict(features_dict)
+            
+            # Atualizar métricas por tipo de ataque
+            predicted_class = result['predicted_class']
+            true_class = 'BenignTraffic' if not is_attack else predicted_class
+            detector.update_metrics(predicted_class, true_class)
+            
             monitor.add_data((features_dict, is_attack))
-            monitor.true_labels.append(is_attack)
         else:
             features_dict = row.to_dict()
             monitor.add_data(features_dict)
         
+        # Mostrar progresso e métricas periodicamente
         if (idx + 1) % 100 == 0:
             stats = detector.get_statistics()
-            progress_msg = f"\nProcessadas {idx + 1} amostras"
-            monitor.save_result(progress_msg)
-            monitor.save_result(f"Taxa de ataques: {stats.get('attack_rate', 0):.3f}")
-            monitor.save_result(f"Tempo médio: {stats.get('avg_inference_time_ms', 0):.2f} ms")
+            print(f"\n📊 Processadas {idx + 1} amostras")
+            print(f"🎯 Taxa de ataques: {stats['attack_rate']:.3f}")
+            print(f"⚡ Tempo médio: {stats['avg_inference_time_ms']:.2f}ms")
+            
+            # Mostrar métricas de avaliação
+            metrics = stats['average_metrics']
+            print("\n📈 Métricas de Avaliação:")
+            print(f"Precisão: {metrics['precision']:.4f}")
+            print(f"Recall: {metrics['recall']:.4f}")
+            print(f"F1-Score: {metrics['f1_score']:.4f}")
+            print(f"Acurácia: {metrics['accuracy']:.4f}")
         
         time.sleep(delay)
 
@@ -475,7 +476,7 @@ def main():
     if args.simulate:
         csv_basename = os.path.splitext(os.path.basename(args.simulate))[0]
         result_file = f"result-minilm-part-{csv_basename}.txt"
-        print(f"Resultados MiniLM serão salvos em: {result_file}")
+        print(f"Resultados serão salvos em: {result_file}")
     elif args.output:
         result_file = args.output
         print(f"Resultados serão salvos em: {result_file}")
@@ -484,19 +485,22 @@ def main():
         detector = NetworkAttackDetector(args.model, args.metadata)
         monitor = RealTimeMonitor(detector, result_file=result_file)
     except Exception as e:
-        print(f"Erro ao inicializar detector MiniLM: {e}")
+        print(f"Erro ao inicializar detector: {e}")
         sys.exit(1)
     
     if args.benchmark:
-        print("Executando benchmark MiniLM para workstation...")
+        print("Executando benchmark...")
         
         test_features = {name: np.random.randn() for name in detector.feature_names}
         
         for i in range(1000):
             detector.predict(test_features)
         
+
+
+
         stats = detector.get_statistics()
-        print(f"\nResultados do benchmark MiniLM:")
+        print(f"\nResultados do benchmark:")
         print(f"Predições: {stats['total_predictions']}")
         print(f"Tempo médio: {stats['avg_inference_time_ms']:.2f} ms")
         print(f"Throughput: {stats['throughput_per_second']:.2f} predições/segundo")
@@ -519,10 +523,10 @@ def main():
             monitor.save_all_results()
             
             if result_file:
-                print(f"\n✅ Análise MiniLM concluída! Resultados salvos em: {result_file}")
+                print(f"\n✅ Análise concluída! Resultados salvos em: {result_file}")
     
     elif args.interactive:
-        print("\nModo interativo MiniLM ativado.")
+        print("\nModo interativo ativado.")
         print("Digite valores para as features ou 'sair' para encerrar.")
         print(f"Features necessárias: {detector.feature_names[:5]}... (total: {len(detector.feature_names)})")
         
@@ -533,7 +537,7 @@ def main():
                 test_features = {name: np.random.randn() for name in detector.feature_names}
                 result = detector.predict(test_features)
                 
-                print(f"\nResultado MiniLM:")
+                print(f"\nResultado:")
                 print(f"  Classe: {result['predicted_class']}")
                 print(f"  Confiança: {result['confidence']:.3f}")
                 print(f"  É ataque: {result['is_attack']}")
